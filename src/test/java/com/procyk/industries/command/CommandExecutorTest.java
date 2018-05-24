@@ -38,7 +38,10 @@ public class CommandExecutorTest {
     @BeforeEach
     public void setUp() {
         Guice.createInjector(new CommandServiceModule(),new AudioServiceModule()).injectMembers(this);
-        commands = Map.of("!test","test action");
+        commands = new HashMap<String, String>()
+        {{
+          put("!test","test action");
+        }};
         messageChannel = mock(MessageChannel.class);
         messageAction = mock(MessageAction.class);
         doNothing().when(messageAction).queue();

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,7 +20,10 @@ class CommandStoreTest {
     public void setup() {
         Injector injector = Guice.createInjector(new CommandServiceModule());
         commandStore = injector.getInstance(CommandStore.class);
-        commands = Map.of(command.getKey(),command.getValue());
+        commands = new HashMap<String, String>()
+        {{
+            put(command.getKey(), command.getValue());
+        }};
     }
     @AfterEach
     public void tearDown() {
