@@ -13,12 +13,26 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class BotModule extends AbstractModule{
 
     @Provides @Named("token") String providesToken() {
-        return "NDIzNjk0NzU0NTg5NzA0MTky.DYuMQg.PU18es0b-sOqu7wCzMYtBcjVyEQ";
+        Path path = Paths.get(getClass().getClassLoader().getResource("token").getPath());
+        Properties properties = new Properties();
+        String result="";
+        try {
+            properties.load(Files.newInputStream(path));
+            result = properties.getProperty("token");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
     @Provides @Named("prefix") String providesPrefix() {
         return "!";
