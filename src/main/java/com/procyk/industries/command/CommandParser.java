@@ -1,11 +1,13 @@
 package com.procyk.industries.command;
 
+import com.procyk.industries.strings.StringModifier;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.lang.reflect.Executable;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -62,7 +64,7 @@ public class CommandParser {
     public static final String getCapture_reservedPlayerCommand = String.format("^!(%s)", reservedPlayerCommandRegex);
     public static final String getCapture_reservedCommand = String.format("((?<=!)(%s))", reservedCommandRegex);
     public static final String allEncompasingRegex= String.format("(?<%s>(!(\\w+))\\s*(!(%s))?([^!]*)(?<!\\s))",capture_command,subCommandRegex);
-
+    public static final String replaceDigitsAfterPlayLocalCommand = "(?<=\\Q!playlocal\\E\\s?)(\\d+)";
     /**
      * Additional delimiters that can be used to daisy chain commands
      */
@@ -74,6 +76,7 @@ public class CommandParser {
     public static final Pattern resrvedCommandPattern = Pattern.compile(getCapture_reservedCommand);
     public static final Pattern reservedPlayerCommandPattern = Pattern.compile(reservedPlayerCommandRegex);
     public static final Pattern optionalArgumentsPattern = Pattern.compile(commandArgumentsRegex);
+    public static final Pattern replaceDigitsAfterPlayLocalCommandPattern = Pattern.compile(replaceDigitsAfterPlayLocalCommand);
 //    public static final Pattern multiCommandPattern = Pattern.compile(multiCommandDelimiterRegex);
 
     private String prefix;
@@ -221,6 +224,25 @@ public class CommandParser {
         return commands;
     }
 
+    /**
+     * Search for an instance of the given pattern and pass it to a function that can use the found string and replace it
+     * with something else.
+     * @param text The text
+     * @param regex Matching Pattern
+     * @return The original String where all matching substrings defined by regex replaced with the result of
+     * StringModifier.
+     */
+    public static String searchAndReplace(String text, Pattern regex, StringModifier stringModifier) {
+        Matcher matcher = regex.matcher(text);
+        StringBuffer stringBuffer = new StringBuffer(text.length());
+        while(matcher.find()) {
+            String match = matcher.group();
+            String modifiedString = stringModifier.apply(match);
+            matcher.appendReplacement(stringBuffer,modifiedString);
+        }
+        matcher.appendTail(stringBuffer);
+        return stringBuffer.toString();
+    }
     private static String removePrefix(String s) {
         String prefix = "!";
         if(s.startsWith(prefix))

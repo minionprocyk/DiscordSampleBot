@@ -94,4 +94,30 @@ class CommandParserTest {
             CommandParser.parseCommands(cmd);
         }
     }
+    @Test
+    public void testPlayLocalCommands() {
+        String strCommand = "!player !playlocal perfectdark/soundwave.mp3";
+        List<Command> parsedCommands = CommandParser.parseCommands(strCommand);
+        Command expectedCommand = new Command(ReservedCommand.player,"!playlocal","perfectdark/soundwave.mp3");
+        assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain wave file");
+    }
+    @Test
+    public void testSearchAndReplaceForNumbersInCommands() {
+        String text = "!player !playlocal 401";
+        String result = CommandParser.searchAndReplace(text,CommandParser.replaceDigitsAfterPlayLocalCommandPattern,(str)-> {
+            int i = Integer.parseInt(str);
+            i++;
+            return Integer.toString(i);
+        });
+        assertEquals("!player !playlocal 402",result,"Expected 401 to be incremented to 402");
+
+        String text2 = "!player !playlocal 401 start=0.1 end=0.8";
+        result = CommandParser.searchAndReplace(text2,CommandParser.replaceDigitsAfterPlayLocalCommandPattern,(str)-> {
+            int i = Integer.parseInt(str);
+            i++;
+            return Integer.toString(i);
+        });
+        assertEquals("!player !playlocal 402 start=0.1 end=0.8",result,"Expected 401 to be incremented to 402");
+
+    }
 }

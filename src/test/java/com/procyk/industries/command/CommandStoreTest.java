@@ -37,4 +37,8 @@ class CommandStoreTest {
                 "Expected command to be added to command store file");
         commandStore.deleteCommand(command);
     }
+    @Test
+    public void fixSongIndexesToPlayableFiles() {
+
+    }
 }

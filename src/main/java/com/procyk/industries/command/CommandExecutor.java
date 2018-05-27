@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.*;
 
 @Singleton
@@ -89,10 +91,16 @@ public class CommandExecutor {
                 audioServiceManager.resume();
                 break;
             case playlocal:
-                //todo add translation step and change ability to playlocal by filename in addition to index
-                int index = Integer.parseInt(command.getValue());
-                String songPath = audioServiceManager.getKnownMusic().get(index).toString();
-                command.setValue(songPath);
+                int index;
+                try {
+                    index = Integer.parseInt(command.getValue());
+                    String songPath = audioServiceManager.getKnownMusic().get(index).toString();
+                    command.setValue(songPath);
+                } catch (NumberFormatException e) {
+                    //could be valid song path, but will need the root path attached
+                    command.setValue(audioServiceManager.getLocalMusicRootPath().resolve(command.getValue()).toString());
+                }
+
                 audioServiceManager.loadWithArgs(command);
                 break;
             case add:
@@ -129,6 +137,14 @@ public class CommandExecutor {
         //get the key and value from this string
         String returnString = this.commands.putIfAbsent(command.getKey(),command.getFormattedString());
         if(Objects.isNull(returnString)) {
+            if(command.getValue().contains(ReservedCommand.player.name())
+                    && command.getValue().contains(ReservedCommand.PlayerCommands.playlocal.name())
+                    ) {
+                String songPath = CommandParser.searchAndReplace(command.getValue(),CommandParser.replaceDigitsAfterPlayLocalCommandPattern,
+                        (str)-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
+                    command.setValue(songPath);
+
+            }
             logger.info("Command added "+command.getKey());
             commandStore.saveCommand(command);
             logger.info("Command saved to file "+command.getKey());

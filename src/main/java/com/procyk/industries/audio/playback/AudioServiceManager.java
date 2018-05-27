@@ -55,6 +55,14 @@ public class AudioServiceManager {
         AudioSourceManagers.registerRemoteSources(audioPlayerManager);
         AudioSourceManagers.registerLocalSource(audioPlayerManager);
     }
+    public Path getLocalMusicRootPath() {
+        return this.localMusicRootPath;
+    }
+    public String getSavableLocalTrackAsString(int songIndex) {
+        String songPath = getKnownMusic().get(songIndex).toString();
+        songPath = songPath.replaceFirst(getLocalMusicRootPath().toString(),"");
+        return songPath;
+    }
     public void next() {
         trackScheduler.startNextTrack();
     }
@@ -85,7 +93,6 @@ public class AudioServiceManager {
         AudioTrackUserData audioTrackUserData = new AudioTrackUserData(lvolume,lstart,lend);
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
         audioLoadResultHandler.setTrackInfo(audioTrackUserData);
-//        audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandler);
         audioLoadResultHandlerNew.setTrackInfo(audioTrackUserData);
         audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew);
     }
