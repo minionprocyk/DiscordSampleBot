@@ -19,7 +19,6 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         super.onMessageReceived(event);
-        logger.info("Messaged Received");
         Message message = new Message(event.getMessage().getContentRaw());
         commandService.performUserRequest(event,message);
     }

@@ -105,7 +105,7 @@ public class Command implements Map.Entry<String,String>, Serializable {
 
     /**
      * String representation to store in file
-     * @return
+     * @return A string representation of this object that is to be used for file storing and loading
      */
     public String getFormattedString() {
         StringBuilder stringBuilder = new StringBuilder();

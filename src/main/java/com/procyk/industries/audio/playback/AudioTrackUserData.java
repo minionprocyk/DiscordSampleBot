@@ -2,7 +2,7 @@ package com.procyk.industries.audio.playback;
 
 public class AudioTrackUserData {
     private int volume;
-    /*
+    /**
     time to start the track in seconds;
      */
     private long start;

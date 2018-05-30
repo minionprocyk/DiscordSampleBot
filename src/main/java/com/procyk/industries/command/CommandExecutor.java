@@ -1,6 +1,7 @@
 package com.procyk.industries.command;
 
 import com.procyk.industries.audio.playback.AudioServiceManager;
+import com.procyk.industries.strings.Strings;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.managers.AudioManager;
@@ -12,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Singleton
 public class CommandExecutor {
@@ -22,13 +23,14 @@ public class CommandExecutor {
     private Map<String,String> commands;
     private CommandStore commandStore;
     private final AudioServiceManager audioServiceManager;
-
+    private final Strings specialStringsUtil;
 
     @Inject
-    public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore) {
+    public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
+        this.specialStringsUtil = strings;
     }
     public void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
@@ -143,7 +145,6 @@ public class CommandExecutor {
                 String songPath = CommandParser.searchAndReplace(command.getValue(),CommandParser.replaceDigitsAfterPlayLocalCommandPattern,
                         (str)-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
                     command.setValue(songPath);
-
             }
             logger.info("Command added "+command.getKey());
             commandStore.saveCommand(command);
@@ -207,9 +208,20 @@ public class CommandExecutor {
             //addCommand(messageChannel,command);
         } else if(StringUtils.isNotBlank(command.getKey())
                 && StringUtils.isBlank(command.getValue())) {
-            command.setValue(
-                    commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey())
-            );
+            String strCommand = commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey());
+            //if a command isn't found. suggest something that was close to it if possible
+            if(strCommand.startsWith("Could not find")) {
+                try {
+                    strCommand = strCommand
+                            .concat(". Did you mean one of these? ")
+                            .concat(suggestCommands(command.getKey()).toString());
+                }
+                catch (NoSuchElementException nsee) {
+                    //keep original strCommand
+                }
+            }
+
+            command.setValue(strCommand);
         }
         //todo: add circular reflexive commands. This current resolves one layer of user commands
         //nested reflection check
@@ -219,6 +231,17 @@ public class CommandExecutor {
         else
             messageChannel.sendMessage(command.getValue()).queue();
     }
+    public List<String> suggestCommands(String strCommand) {
+        return commands.entrySet()
+                .stream()
+                .filter(entry ->
+                    specialStringsUtil.almostMatches(entry.getKey(),strCommand,2)
+                )
+                .map(Map.Entry::getKey)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
 
     public void groupCommands(MessageChannel messageChannel, Member member, Command command) {
         //todo fill in command

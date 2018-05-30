@@ -1,11 +1,8 @@
 package com.procyk.industries.command;
 
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.procyk.industries.module.AudioServiceModule;
-import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -13,18 +10,14 @@ import net.dv8tion.jda.core.requests.restaction.MessageAction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestTemplate;
 
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CommandExecutorTest {
     Map<String,String> commands;
@@ -66,6 +59,12 @@ public class CommandExecutorTest {
     @Test
     public void testReflexiveCommands() {
 
+    }
+    @Test
+    public void testSuggestCommands() {
+        String testCommand= "!test";
+
+        assertTrue(commandExecutor.suggestCommands(testCommand).size()>0);
     }
     @Test
     public void testGroupCommands() {

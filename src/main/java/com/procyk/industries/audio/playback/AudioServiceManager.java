@@ -60,7 +60,7 @@ public class AudioServiceManager {
     }
     public String getSavableLocalTrackAsString(int songIndex) {
         String songPath = getKnownMusic().get(songIndex).toString();
-        songPath = songPath.replaceFirst(getLocalMusicRootPath().toString(),"");
+        songPath = songPath.replaceFirst(getLocalMusicRootPath().toString()+"/","");
         return songPath;
     }
     public void next() {
