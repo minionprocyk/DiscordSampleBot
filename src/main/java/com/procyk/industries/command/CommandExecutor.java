@@ -1,6 +1,7 @@
 package com.procyk.industries.command;
 
 import com.procyk.industries.audio.playback.AudioServiceManager;
+import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.strings.Strings;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -56,20 +57,29 @@ public class CommandExecutor {
         ReservedCommand.PlayerCommands playerCommand = ReservedCommand.PlayerCommands.parse(command.getKey());
         switch(playerCommand){
             case localmusic:
+                /**
+                 * Allow an argument to be passed, this will be the folder you want to access.
+                 * i.e. !player !localmusic pnbajamclips
+                 *      !player !localmusic
+                 *      !player !localmusic pnbajamclips/PS2Jam/Ps2Jam
+                 */
                 StringBuilder stringBuilder = new StringBuilder(250);
                 List<Path> knownMusic = audioServiceManager.getKnownMusic();
                 for(int i=0;i<knownMusic.size();i++) {
                     Path musicFile = knownMusic.get(i);
                     if(musicFile.toFile().isFile()) {
-                        stringBuilder.append("Track: "+i+" - "+ FilenameUtils.getBaseName(musicFile.getFileName().toString())+"\n");
+                        stringBuilder.append("Track: ")
+                        .append(audioServiceManager.getSavableLocalTrackAsString(i))
+                        .append("\n");
                     }
                 }
-                messageChannel.sendMessage(stringBuilder.toString().substring(0,Math.min(stringBuilder.length(),1999))).queue();
+
+                MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
                 break;
             case commands:
                 List<ReservedCommand.PlayerCommands> playerCommands = Arrays.asList(ReservedCommand.PlayerCommands.values());
                 Collections.sort(playerCommands);
-                messageChannel.sendMessage(playerCommands.toString()).queue();
+                MessageHandler.sendMessage(messageChannel,playerCommands.toString());
                 break;
             case clear:
                 audioServiceManager.clearPlaylist();
@@ -79,15 +89,18 @@ public class CommandExecutor {
                 audioServiceManager.next();
                 break;
             case pause:
-            case stop:
                 audioServiceManager.pause();
+                break;
+            case stop:
+            case end:
+                audioServiceManager.endCurrentSong();
                 break;
             case last:
             case previous:
                 audioServiceManager.last();
                 break;
             case playlist:
-                messageChannel.sendMessage(audioServiceManager.getPlayList()).queue();
+                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
                 break;
             case resume:
                 audioServiceManager.resume();

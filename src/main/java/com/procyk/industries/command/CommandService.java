@@ -66,7 +66,7 @@ public class CommandService {
                 commandExecutor.deleteCommand(messageChannel,member,command);
                 break;
             case group:
-                commandExecutor.groupCommands(messageChannel,member,command);
+                commandExecutor.groupCommands(messageChannel, member, command);
                 break;
             case record:
                 break;
@@ -75,16 +75,16 @@ public class CommandService {
                 //commandExecutor.notify(messageChannel,member,command);
                 break;
             case player:
-                commandExecutor.playerCommands(messageChannel,command);
+                commandExecutor.playerCommands(messageChannel, command);
                 break;
             case join:
-                commandExecutor.joinVoiceChannel(messageChannel,textChannel,member,guild);
+                commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);
                 break;
             case leave:
                 commandExecutor.leaveVoiceChannel(guild);
                 break;
             case shutdown:
-               commandExecutor.shutdown(messageChannel,member);
+               commandExecutor.shutdown(messageChannel, member);
                 break;
             case test:
                 break;

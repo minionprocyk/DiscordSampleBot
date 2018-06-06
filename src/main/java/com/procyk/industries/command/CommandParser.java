@@ -61,7 +61,7 @@ public class CommandParser {
     public static final String userCommandRegex = String.format("(?<%s>^![\\w]+)",capture_command);
 
     public static final String commandArgumentsRegex = "((?<=\\s)\\w+=[^\\s]+)(?<!\\s)";
-    public static final String getCapture_reservedPlayerCommand = String.format("^!(%s)", reservedPlayerCommandRegex);
+    public static final String getCapture_reservedPlayerCommand = String.format("((?<=!)(%s))", reservedPlayerCommandRegex);
     public static final String getCapture_reservedCommand = String.format("((?<=!)(%s))", reservedCommandRegex);
     public static final String allEncompasingRegex= String.format("(?<%s>(!(\\w+))\\s*(!(%s))?([^!]*)(?<!\\s))",capture_command,subCommandRegex);
     public static final String replaceDigitsAfterPlayLocalCommand = "(?<=\\Q!playlocal\\E\\s?)(\\d+)";
@@ -118,6 +118,16 @@ public class CommandParser {
     }
     public static Command parseCommand(String value) {
         return parseCommand(value,false);
+    }
+    public static ReservedCommand.PlayerCommands parsePlayerCommand(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            Matcher reservedCommandMatcher = reservedPlayerCommandPattern.matcher(value);
+            if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
+                String strReservedCommand = reservedCommandMatcher.group();
+                return ReservedCommand.PlayerCommands.valueOf(strReservedCommand);
+            }
+        }
+        return ReservedCommand.PlayerCommands.error;
     }
     public static ReservedCommand parseReservedCommand(String value) {
         if(StringUtils.isNotBlank(value)) {

@@ -117,5 +117,8 @@ public class AudioServiceManager {
     public void clearPlaylist() {
         trackScheduler.clearPlaylist();
     }
+    public void endCurrentSong() {
+        trackScheduler.cancelPlayingTrack();
+    }
 
 }

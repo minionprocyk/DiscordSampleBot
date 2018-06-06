@@ -5,9 +5,11 @@ public enum ReservedCommand {
     add ,edit,delete,group,leave,join,shutdown,commands,record,notify,notifyme,player,user,test,none ;
 
     public enum PlayerCommands{
-        commands,skip,next,pause,stop,last,previous,playlist,resume,add,clear,play,queue,seek,volume,localmusic,playlocal;
+        commands,skip,next,pause,stop,last,previous,playlist,resume,add,clear,play,queue,seek,volume, localmusic,
+        playlocal, end, error;
         public static PlayerCommands parse(String key) {
-            return valueOf(key.substring(1));
+            return CommandParser.parsePlayerCommand(key);
+//            return valueOf(key.substring(1));
         }
     }
 

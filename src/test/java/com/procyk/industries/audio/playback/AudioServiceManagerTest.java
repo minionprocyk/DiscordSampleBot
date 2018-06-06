@@ -28,5 +28,9 @@ public class AudioServiceManagerTest {
         int songIndex=3;
         String result = audioServiceManager.getSavableLocalTrackAsString(songIndex);
         assertEquals("pnbajamclips",result);
+        result = audioServiceManager.getSavableLocalTrackAsString(200);
+        assertEquals("pnbajamclips",result);
+
     }
+
 }
