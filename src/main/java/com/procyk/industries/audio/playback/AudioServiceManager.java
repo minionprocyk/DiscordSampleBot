@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,26 @@ public class AudioServiceManager {
     }
     public Path getLocalMusicRootPath() {
         return this.localMusicRootPath;
+    }
+
+    /**
+     * Lists all items, directories and files, contained within the folder specified off of the LocalMusic
+     * root directory. If the directory parameter is empty then the root path will be listed instead.
+     * @param directory Directory off of LocalMusic root directory
+     * @return
+     */
+    public List<Path> getSongsInDirectory(String directory) throws IOException {
+        directory = directory == null ? "" : directory;
+       return Files.walk(getLocalMusicRootPath().resolve(directory),1)
+                .filter(path-> path.equals(getLocalMusicRootPath())==false)
+                .collect(Collectors.toList());
+    }
+    public String trimRootPath(String songPath) {
+        if(songPath.equals(getLocalMusicRootPath().toString()))
+            throw new IllegalArgumentException("Cannot accept LocalMusic root path as a trimmable path");
+        int indexOfSongPath = songPath.indexOf(getLocalMusicRootPath().toString());
+        int length = getLocalMusicRootPath().toString().length();
+        return songPath.substring(indexOfSongPath+length+"/".length());
     }
     public String getSavableLocalTrackAsString(int songIndex) {
         String songPath = getKnownMusic().get(songIndex).toString();

@@ -9,6 +9,9 @@ import com.procyk.industries.module.CommandServiceModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,8 +32,13 @@ public class AudioServiceManagerTest {
         String result = audioServiceManager.getSavableLocalTrackAsString(songIndex);
         assertEquals("pnbajamclips",result);
         result = audioServiceManager.getSavableLocalTrackAsString(200);
-        assertEquals("pnbajamclips",result);
+        assertEquals("perfect.dark_.xbla-soundpack/fx/00000275_11025.wav",result);
 
+    }
+    @Test
+    public void testTrimRootPath() {
+        List<Path> files = audioServiceManager.getSongsInDirectory("pnbajamclips");
+        assertEquals("pnbajamclips",audioServiceManager.trimRootPath(files.get(0).toString()));
     }
 
 }

@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
+
     @Inject
     public CommandService(CommandExecutor commandExecutor) {
         this.commandExecutor=commandExecutor;

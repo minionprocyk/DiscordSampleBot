@@ -102,6 +102,13 @@ class CommandParserTest {
         assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain wave file");
     }
     @Test
+    public void testPlayerLocalMusicCommand() {
+        String strCommand = "!player !localmusic pnbajamclips/turtleme";
+        List<Command> parsedCommands = CommandParser.parseCommands(strCommand);
+        Command expectedCommand = new Command(ReservedCommand.player,"!localmusic","pnbajamclips/turtleme");
+        assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain directory");
+    }
+    @Test
     public void testSearchAndReplaceForNumbersInCommands() {
         String text = "!player !playlocal 401";
         String result = CommandParser.searchAndReplace(text,CommandParser.replaceDigitsAfterPlayLocalCommandPattern,(str)-> {
