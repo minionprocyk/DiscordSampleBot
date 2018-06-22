@@ -2,14 +2,13 @@ package com.procyk.industries.command;
 
 
 public enum ReservedCommand {
-    add ,edit,delete,group,leave,join,shutdown,commands,record,notify,notifyme,player,user,test,none ;
+    add ,edit,delete,group,leave,join,shutdown,commands,record,notify,notifyme,player,random, user,test,none ;
 
     public enum PlayerCommands{
         commands,skip,next,pause,stop,last,previous,playlist,resume,add,clear,play,queue,seek,volume, localmusic,
-        playlocal, end, error;
+        playlocal, end, error, repeat, random;
         public static PlayerCommands parse(String key) {
             return CommandParser.parsePlayerCommand(key);
-//            return valueOf(key.substring(1));
         }
     }
 

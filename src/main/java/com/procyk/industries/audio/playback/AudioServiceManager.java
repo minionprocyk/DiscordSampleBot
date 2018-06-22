@@ -3,12 +3,9 @@ package com.procyk.industries.audio.playback;
 import com.google.inject.name.Named;
 import com.procyk.industries.command.Command;
 import com.procyk.industries.command.CommandParser;
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +87,15 @@ public class AudioServiceManager {
     public void pause() {
         audioPlayer.setPaused(true);
     }
+    public AudioPlayer getAudioPlayer() {
+        return this.audioPlayer;
+    }
+    public void repeat(boolean repeat) {
+        trackScheduler.setRepeat(repeat);
+    }
+    public TrackScheduler getTrackScheduler() {
+        return this.trackScheduler;
+    }
     public void resume() {
         audioPlayer.setPaused(false);
     }
@@ -123,7 +128,10 @@ public class AudioServiceManager {
         audioManager.setSendingHandler(audioSendHandler);
     }
     public void setVolume(int volume) {
-        if(volume>100 || volume < 0)return;
+        if(volume>100)
+            volume=100;
+        if(volume<0)
+            volume=0;
         audioPlayer.setVolume(volume);
     }
     public void last() {

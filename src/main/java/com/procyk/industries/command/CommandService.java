@@ -57,6 +57,11 @@ public class CommandService {
                 };
                 commandExecutor.userCommand(messageChannel,command,reflexiveAction);
                 break;
+            case random:
+                //forward a user-request with a random user-created command
+                String randomCommand = commandExecutor.randomCommand(messageChannel);
+                performUserRequest(event,new Message(randomCommand));
+                break;
             case commands:
                 commandExecutor.printCommands(messageChannel);
                 break;

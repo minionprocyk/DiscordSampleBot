@@ -1,12 +1,13 @@
 package com.procyk.industries.command;
 
 import com.procyk.industries.audio.playback.AudioServiceManager;
+import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.strings.Strings;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.managers.AudioManager;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,7 +27,6 @@ public class CommandExecutor {
     private CommandStore commandStore;
     private final AudioServiceManager audioServiceManager;
     private final Strings specialStringsUtil;
-
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings) {
         commands = commandStore.getCommands();
@@ -56,6 +55,7 @@ public class CommandExecutor {
     }
 
     public void playerCommands(MessageChannel messageChannel, Command command) {
+        AudioPlayer player = audioServiceManager.getAudioPlayer();
         ReservedCommand.PlayerCommands playerCommand = ReservedCommand.PlayerCommands.parse(command.getKey());
         switch(playerCommand){
             case localmusic:
@@ -89,21 +89,29 @@ public class CommandExecutor {
                 break;
             case clear:
                 audioServiceManager.clearPlaylist();
+                MessageHandler.sendMessage(messageChannel,"Playlist has been cleared");
                 break;
             case skip:
             case next:
                 audioServiceManager.next();
+                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
                 break;
             case pause:
                 audioServiceManager.pause();
+
+                MessageHandler.sendMessage(messageChannel, "Audio Player: ".concat(
+                        player.isPaused() ? "off" : "on"
+                ));
                 break;
             case stop:
             case end:
                 audioServiceManager.endCurrentSong();
+
                 break;
             case last:
             case previous:
                 audioServiceManager.last();
+                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
                 break;
             case playlist:
                 MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
@@ -139,14 +147,93 @@ public class CommandExecutor {
             case seek:
 
                 break;
+            case random:
+                List<Path> music = audioServiceManager.getKnownMusic();
+                Random random = new Random();
+                int rIndex = random.nextInt(music.size());
+                String songPath = music.get(rIndex).toString();
+                command.setValue(songPath);
+                audioServiceManager.loadWithArgs(command);
+                break;
+
+            case repeat:
+                String arg = command.getValue();
+                TrackScheduler trackScheduler = audioServiceManager.getTrackScheduler();
+                switch(arg.toLowerCase()) {
+                    case "on":
+                    case "true":
+                        trackScheduler.setRepeat(true);
+                        break;
+                    case "off":
+                    case "false":
+                        trackScheduler.setRepeat(false);
+                        break;
+                    default:
+                        boolean currVal = trackScheduler.getRepeat();
+                        trackScheduler.setRepeat(!currVal);
+                        MessageHandler.sendMessage(messageChannel,
+                                String.format("Repeat mode was %s but is now %s.",
+                                        currVal ? "on" : "off",
+                                        currVal ? "off" : "on"));
+                }
+
+                break;
             case volume:
+                /**
+                 * !player !volume +10, !player !volume 10 !player !volume -20
+                 */
+                Integer currVolume = player.getVolume();
+                boolean addVolume=false;
+                boolean setVolume=true;
+
                 if(StringUtils.isBlank(command.getValue())) {
-                    MessageHandler.sendMessage(messageChannel, "Player Volume: ???");
+
+                    MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
+                    return;
+                }
+                char firstChar = command.getValue().charAt(0);
+
+
+                if( firstChar=='+') {
+                    addVolume=true;
+                    setVolume=false;
+                }
+                else if(firstChar=='-') {
+                    addVolume=false;
+                    setVolume=false;
                 }
                 else {
-                    int volume = Integer.parseInt(command.getValue().trim());
-                    audioServiceManager.setVolume(volume);
+                    try {
+                        currVolume = Integer.parseInt(command.getValue().trim());
+                    } catch (NumberFormatException e) {
+                        MessageHandler.sendMessage(messageChannel, "I can't interpret: ".concat(command.getValue()));
+                        MessageHandler.sendMessage(messageChannel, "Try something like, [!player !volume +10]"
+                        +", [!player !volume -10], or [!player !volume 10]");
+
+                    }
                 }
+
+                if(setVolume==false) {
+                    //get all chars after the operator to parse as int
+                    char[] volume = new char[command.getValue().length()-1];
+                    command.getValue().getChars(1,command.getValue().length(),volume,0);
+
+                    int val = 0;
+                    try {
+                        val = Integer.parseInt(new String(volume));
+                    } catch (NumberFormatException e) {
+                        MessageHandler.sendMessage(messageChannel, "I can't interpret: ".concat(command.getValue()));
+                        MessageHandler.sendMessage(messageChannel, "Try something like, [!player !volume +10]"
+                                +", [!player !volume -10], or [!player !volume 10]");                    }
+
+                    if(addVolume)
+                        currVolume+=val;
+                    else
+                        currVolume-=val;
+
+                }
+                audioServiceManager.setVolume(currVolume);
+
                 break;
             default:
                 MessageHandler.sendMessage(messageChannel, 
@@ -203,6 +290,13 @@ public class CommandExecutor {
             );
         }
 
+    }
+    public String randomCommand(MessageChannel messageChannel) {
+        Random random = new Random();
+        String[] keys = commands.keySet().toArray(new String[0]);
+        String randomKey = keys[random.nextInt(keys.length)];
+        MessageHandler.sendMessage(messageChannel, "Preparing command: ".concat(randomKey));
+        return randomKey;
     }
     public void deleteCommand(MessageChannel messageChannel, Member member, Command command) {
         if(member.hasPermission(Permission.ADMINISTRATOR)

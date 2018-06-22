@@ -24,6 +24,7 @@ public class TrackScheduler extends AudioEventAdapter{
     private final AudioPlayer player;
     private AudioTrack lastTrack;
     private Deque<AudioTrack> queueTracks;
+    private boolean repeat=false;
     @Inject
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
@@ -55,6 +56,12 @@ public class TrackScheduler extends AudioEventAdapter{
         if(player.getPlayingTrack()==null) {
             startNextTrack();
         }
+    }
+    public boolean getRepeat() {
+        return this.repeat;
+    }
+    public void setRepeat(boolean bRepeat) {
+        this.repeat = bRepeat;
     }
     public void cancelPlayingTrack() {
         if(player.getPlayingTrack()!=null) {
@@ -105,8 +112,12 @@ public class TrackScheduler extends AudioEventAdapter{
         logger.info("Track ended with reason: "+endReason);
         if (endReason.mayStartNext || endReason==AudioTrackEndReason.STOPPED) {
             lastTrack=track;
-            // Start next track
-            startNextTrack();
+            if(repeat) {
+                startTrack(track.makeClone(),false);
+            }
+            else {
+                startNextTrack();
+            }
         }
 
         // endReason == FINISHED: A track finished or died by an exception (mayStartNext = true).
