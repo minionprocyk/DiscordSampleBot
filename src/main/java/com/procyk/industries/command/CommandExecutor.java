@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class CommandExecutor {
     private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
-    private Map<String,String> commands;
-    private CommandStore commandStore;
+    private final Map<String,String> commands;
+    private final CommandStore commandStore;
     private final AudioServiceManager audioServiceManager;
     private final Strings specialStringsUtil;
     @Inject
@@ -34,16 +34,16 @@ public class CommandExecutor {
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
     }
-    public void shutdown(MessageChannel messageChannel, Member member) {
+    void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
             messageChannel.getJDA().shutdown();
         else
             MessageHandler.sendMessage(messageChannel, member.getUser().getName()+" tried to fuck me up.... HAHA");
     }
-    public void leaveVoiceChannel(Guild guild) {
+    void leaveVoiceChannel(Guild guild) {
         guild.getAudioManager().closeAudioConnection();
     }
-    public void joinVoiceChannel(MessageChannel messageChannel, Channel channel, Member member, Guild guild) {
+    void joinVoiceChannel(MessageChannel messageChannel, Channel channel, Member member, Guild guild) {
         if(guild.getSelfMember().hasPermission(channel, Permission.VOICE_CONNECT)) {
             VoiceChannel voiceChannel = member.getVoiceState().getChannel();
             AudioManager audioManager = guild.getAudioManager();
@@ -54,12 +54,12 @@ public class CommandExecutor {
         }
     }
 
-    public void playerCommands(MessageChannel messageChannel, Command command) {
+    void playerCommands(MessageChannel messageChannel, Command command) {
         AudioPlayer player = audioServiceManager.getAudioPlayer();
         ReservedCommand.PlayerCommands playerCommand = ReservedCommand.PlayerCommands.parse(command.getKey());
         switch(playerCommand){
             case localmusic:
-                /**
+                /*
                  * Allow an argument to be passed, this will be the folder you want to access.
                  * i.e. !player !localmusic pnbajamclips
                  *      !player !localmusic
@@ -67,7 +67,7 @@ public class CommandExecutor {
                  */
                 //if the command value contains nothing list the root directory
                 StringBuilder stringBuilder = new StringBuilder(50);
-                List<Path> knownMusic = null;
+                List<Path> knownMusic;
                 try {
                     knownMusic = audioServiceManager.getSongsInDirectory(command.getValue());
                     knownMusic.forEach(path->
@@ -137,7 +137,7 @@ public class CommandExecutor {
             case queue :
                 if(StringUtils.isBlank(command.getValue())) {
                     MessageHandler.sendMessage(messageChannel, 
-                            String.format("I can't read [!player %s]. Try [!player %s <youtube_link>]",command.getKey())
+                            String.format("I can't read [!player %s]. Try [!player %<s <youtube_link>]",command.getKey())
                     );
                 }
                 else {
@@ -179,7 +179,7 @@ public class CommandExecutor {
 
                 break;
             case volume:
-                /**
+                /*
                  * !player !volume +10, !player !volume 10 !player !volume -20
                  */
                 Integer currVolume = player.getVolume();
@@ -199,7 +199,6 @@ public class CommandExecutor {
                     setVolume=false;
                 }
                 else if(firstChar=='-') {
-                    addVolume=false;
                     setVolume=false;
                 }
                 else {
@@ -233,7 +232,7 @@ public class CommandExecutor {
 
                 }
                 audioServiceManager.setVolume(currVolume);
-
+                MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
                 break;
             default:
                 MessageHandler.sendMessage(messageChannel, 
@@ -241,14 +240,24 @@ public class CommandExecutor {
                 );
         }
     }
-    public boolean addCommand(MessageChannel messageChannel,Command command) {
+
+    /**
+     * Takes the supplied {@code Command} and attempts to save it to file. If the command contains is a local player
+     * command, or !player !playlocal command that uses an index, it will search for the path of the song and use that
+     * to store the song.
+     * @param messageChannel The MessageChannel
+     * @param command The command
+     */
+    void addCommand(MessageChannel messageChannel,Command command) {
         //get the key and value from this string
         String returnString = this.commands.putIfAbsent(command.getKey(),command.getFormattedString());
         if(Objects.isNull(returnString)) {
             if(command.getValue().contains(ReservedCommand.player.name())
                     && command.getValue().contains(ReservedCommand.PlayerCommands.playlocal.name())
                     ) {
-                String songPath = CommandParser.searchAndReplace(command.getValue(),CommandParser.replaceDigitsAfterPlayLocalCommandPattern,
+                String songPath = CommandParser.searchAndReplace(
+                        command.getValue(),
+                        CommandParser.replaceDigitsAfterPlayLocalCommandPattern,
                         (str)-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
                     command.setValue(songPath);
             }
@@ -256,11 +265,9 @@ public class CommandExecutor {
             commandStore.saveCommand(command);
             logger.info("Command saved to file "+command.getKey());
             MessageHandler.sendMessage(messageChannel, "Added ".concat(command.getKey()));
-            return true;
         }
-        return false;
     }
-    public void printCommands(MessageChannel messageChannel) {
+    void printCommands(MessageChannel messageChannel) {
         List<String> commandList = new ArrayList<>(commands.keySet());
         Collections.sort(commandList);
         MessageHandler.sendMessage(messageChannel, commandList.toString());
@@ -272,7 +279,7 @@ public class CommandExecutor {
      * e.g. Existing command = !tickle I tickle you! -> !edit !tickle get tickled! -> !tickle get tickled!
      * @param command Container of command information
      */
-    public void editCommand(MessageChannel messageChannel, Member member,Command command) {
+    void editCommand(MessageChannel messageChannel, Member member,Command command) {
         if(member.hasPermission(Permission.ADMINISTRATOR)
                 || member.hasPermission(Permission.BAN_MEMBERS)) {
             String keyCommand = commands.get(command.getKey());
@@ -291,14 +298,20 @@ public class CommandExecutor {
         }
 
     }
-    public String randomCommand(MessageChannel messageChannel) {
+
+    /**
+     * Selects a random user-created command and performs that action as if a user requested it.
+     * @param messageChannel Discord message channel
+     * @return A string representing a user requested available command
+     */
+    String randomCommand(MessageChannel messageChannel) {
         Random random = new Random();
         String[] keys = commands.keySet().toArray(new String[0]);
         String randomKey = keys[random.nextInt(keys.length)];
         MessageHandler.sendMessage(messageChannel, "Preparing command: ".concat(randomKey));
         return randomKey;
     }
-    public void deleteCommand(MessageChannel messageChannel, Member member, Command command) {
+    void deleteCommand(MessageChannel messageChannel, Member member, Command command) {
         if(member.hasPermission(Permission.ADMINISTRATOR)
                 || member.hasPermission(Permission.BAN_MEMBERS)) {
             commandStore.deleteCommand(command);
@@ -313,14 +326,11 @@ public class CommandExecutor {
     /**
      * Check if user command contains a key and value. A key only reference will search a map of commands for an
      * existing command to execute. A key value reference will attempt to add the command using the value provided.
-     * @param command
+     * @param command The Command
      */
-    public void userCommand(MessageChannel messageChannel, Command command, Action reflexiveAction) {
+    void userCommand(MessageChannel messageChannel, Command command, Action reflexiveAction) {
         Objects.requireNonNull(command);
         if(StringUtils.isNotBlank(command.getKey())
-           && StringUtils.isNotBlank(command.getValue())) {
-            //addCommand(messageChannel,command);
-        } else if(StringUtils.isNotBlank(command.getKey())
                 && StringUtils.isBlank(command.getValue())) {
             String strCommand = commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey());
             //if a command isn't found. suggest something that was close to it if possible
@@ -345,7 +355,13 @@ public class CommandExecutor {
         else
             MessageHandler.sendMessage(messageChannel, command.getValue());
     }
-    public List<String> suggestCommands(String strCommand) {
+
+    /**
+     * Determines a list of possible outcomes that the user was trying to do.
+     * @param strCommand User attempted command string
+     * @return A list of possible outcomes that the user was trying to perform
+     */
+    List<String> suggestCommands(String strCommand) {
         return commands.entrySet()
                 .stream()
                 .filter(entry ->
@@ -356,12 +372,34 @@ public class CommandExecutor {
                 .collect(Collectors.toList());
     }
 
-
-    public void groupCommands(MessageChannel messageChannel, Member member, Command command) {
-        //todo fill in command
+    /**
+     * Groups a set of commands out of the root node and into some child node
+     * @param messageChannel Discord Message Channel
+     * @param member User who requested
+     * @param command Command
+     */
+    void groupCommands(MessageChannel messageChannel, Member member, Command command) {
+        MessageHandler.sendMessage(
+                messageChannel,
+                String.format("Hello %s I don't know how to group using [%s] just yet.",
+                member!=null ? member.getUser().getName() : "person",
+                command.getValue())
+        );
     }
-    //[name][event][action]
-    public void notifyme(MessageChannel messageChannel, Member member, Command command) {
+
+    /**
+     * Registers an event to perform an action when the event occurs
+     * @param messageChannel Discord Message Channel
+     * @param member User who requested
+     * @param command Command
+     */
+    void notifyme(MessageChannel messageChannel, Member member, Command command) {
         //!notifyme berge gamefinished !player !play <link> !whyme
+        MessageHandler.sendMessage(
+                messageChannel,
+                String.format("Hello %s I don't know how to notify using [%s] just yet.",
+                        member!=null ? member.getUser().getName() : "person",
+                        command.getValue())
+        );
     }
 }

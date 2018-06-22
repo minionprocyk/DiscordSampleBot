@@ -16,6 +16,7 @@
 DiscordSampleBot.i*
 build/
 out/
+src/main/resources/token
 
 # Package Files #
 *.jar

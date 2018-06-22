@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class StringsTest {
-    Strings strings = new Strings();
+class StringsTest {
+    private final Strings strings = new Strings();
     @Test
-    public void testStringMatcher() {
+    void testStringMatcher() {
         String text = "!imdieing";
         String match = "!imdying";
         int allowedErrors = 2;
@@ -24,7 +24,7 @@ public class StringsTest {
 
     }
     @Test
-    public void testStringJointMatcher() {
+    void testStringJointMatcher() {
         String text = "!cunt";
         String match = "!imdieing";
         int allowedErrors=2;

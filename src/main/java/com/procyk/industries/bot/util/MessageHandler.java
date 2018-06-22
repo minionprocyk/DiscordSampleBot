@@ -4,7 +4,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
 
 public class MessageHandler {
-    static int MESSAGE_SIZE=1990;
+    static final int MESSAGE_SIZE=1990;
     /**
      * Generic handler for sending messages through the bot. Accounts for maximum string lengths and queues up chunks
      * of messages when the message is too big.
@@ -25,10 +25,9 @@ public class MessageHandler {
         }
     }
     private static void sendMessageHandler(MessageChannel messageChannel, String message) {
-        StringBuilder sb = new StringBuilder(message.length()+6);
-        sb.append("```")
-                .append(message)
-                .append("```");
-        messageChannel.sendMessage(sb.toString()).queue();
+        String sb = "```" +
+                message +
+                "```";
+        messageChannel.sendMessage(sb).queue();
     }
 }

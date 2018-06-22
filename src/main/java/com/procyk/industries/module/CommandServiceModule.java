@@ -5,7 +5,6 @@ import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

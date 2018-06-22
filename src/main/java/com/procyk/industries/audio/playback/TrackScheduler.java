@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -23,7 +22,7 @@ public class TrackScheduler extends AudioEventAdapter{
     private static final Logger logger = LoggerFactory.getLogger(TrackScheduler.class);
     private final AudioPlayer player;
     private AudioTrack lastTrack;
-    private Deque<AudioTrack> queueTracks;
+    private final Deque<AudioTrack> queueTracks;
     private boolean repeat=false;
     @Inject
     public TrackScheduler(AudioPlayer player) {

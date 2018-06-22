@@ -2,7 +2,6 @@ package com.procyk.industries.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.name.Named;
 import com.procyk.industries.audio.playback.AudioLoadResultHandlerImpl;
@@ -17,7 +16,6 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class AudioServiceModule extends AbstractModule{
     @Provides @Singleton AudioPlayerManager providesAudioPlayerManager() {
@@ -29,10 +27,10 @@ public class AudioServiceModule extends AbstractModule{
     @Provides @Singleton
     @Named("LOCAL_MUSIC")
     Path providesAudioRootLocalMusicFolder (@Named("APP_PATH") Path path) {
+        //noinspection CatchMayIgnoreException
         try {
             Files.createDirectory(path.resolve("LocalMusic"));
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {        }
         return path.resolve("LocalMusic");
     }
     @Override

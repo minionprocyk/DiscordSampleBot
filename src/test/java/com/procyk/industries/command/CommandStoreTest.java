@@ -13,11 +13,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommandStoreTest {
-    CommandStore commandStore;
-    Map<String,String> commands;
-    Command command = new Command("!unit_test_command_store","test value");
+    private CommandStore commandStore;
+    private Map<String,String> commands;
+    private final Command command = new Command("!unit_test_command_store","test value");
     @BeforeEach
-    public void setup() {
+    void setup() {
         Injector injector = Guice.createInjector(new CommandServiceModule());
         commandStore = injector.getInstance(CommandStore.class);
         commands = new HashMap<String, String>()
@@ -26,19 +26,15 @@ class CommandStoreTest {
         }};
     }
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         commandStore=null;
     }
     @Test
-    public void testStore() {
+    void testStore() {
         commandStore.saveCommands(commands);
 
         assertEquals(command.getValue(),commandStore.getCommands().get(command.getKey()),
                 "Expected command to be added to command store file");
         commandStore.deleteCommand(command);
-    }
-    @Test
-    public void fixSongIndexesToPlayableFiles() {
-
     }
 }

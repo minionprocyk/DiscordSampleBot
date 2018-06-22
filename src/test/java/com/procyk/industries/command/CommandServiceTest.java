@@ -13,8 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -22,15 +20,16 @@ import static org.mockito.Mockito.when;
 
 class CommandServiceTest {
     @Inject
+    private
     CommandService commandService;
-    MessageReceivedEvent messageReceivedEvent;
-    MessageChannel messageChannel;
-    MessageAction messageAction;
-    TextChannel textChannel;
-    Member member;
-    Guild guild;
-    User user;
-    Message message;
+    private MessageReceivedEvent messageReceivedEvent;
+    private MessageChannel messageChannel;
+    private MessageAction messageAction;
+    private TextChannel textChannel;
+    private Member member;
+    private Guild guild;
+    private User user;
+    private Message message;
 
     @BeforeEach
     void setUp() {

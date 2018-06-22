@@ -2,19 +2,14 @@ package com.procyk.industries.command;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommandParserTest {
 
     @Test
-    public void testCommandParserWithAddCommand() {
+    void testCommandParserWithAddCommand() {
         String strCommand = "!test !dome test me";
         Command command = CommandParser.parseCommand(strCommand);
         Command expected = new Command(ReservedCommand.test,"!dome","test me");
@@ -22,29 +17,29 @@ class CommandParserTest {
 
     }
     @Test
-    public void testCommandParserWithMultiCommands() {
+    void testCommandParserWithMultiCommands() {
         String strCommand = "!add !money !player !play <link>";
         List<Command> commands = CommandParser.parseCommands(strCommand);
-        List<Command> expectedCommands = Arrays.asList(
-                new Command(ReservedCommand.add,"!money","!player !play <link>")
+        List<Command> expectedCommands = Collections.singletonList(
+                new Command(ReservedCommand.add, "!money", "!player !play <link>")
         );
         assertEquals(expectedCommands,commands,"Expected one command for add");
     }
 
     @Test
-    public void testCommandParserWithMultiCommandsForUser() {
+    void testCommandParserWithMultiCommandsForUser() {
         String strCommand = "!player !play <link>";
         Map<String,String> optionalArgs = new HashMap<>();
         List<Command> commands = CommandParser.parseCommands(strCommand);
-        List<Command> expectedCommands = Arrays.asList(
-            new Command(ReservedCommand.player,"!play","<link>")
+        List<Command> expectedCommands = Collections.singletonList(
+                new Command(ReservedCommand.player, "!play", "<link>")
         );
         assertEquals(expectedCommands,commands,"Expected one command for player");
-        assertEquals(Arrays.asList(new Command(ReservedCommand.join,"","")),CommandParser.parseCommands("!join"));
+        assertEquals(Collections.singletonList(new Command(ReservedCommand.join, "", "")),CommandParser.parseCommands("!join"));
         String testString="!gatorade its what they use to make brawndo";
-        assertEquals(Arrays.asList(new Command(ReservedCommand.user,"!gatorade","its what they use to make brawndo")),
+        assertEquals(Collections.singletonList(new Command(ReservedCommand.user, "!gatorade", "its what they use to make brawndo")),
                 CommandParser.parseCommands(testString));
-        assertEquals(Arrays.asList(new Command(ReservedCommand.player,"!play","https://www.youtube.com/watch?v=hT47Ysl-2Ew")),
+        assertEquals(Collections.singletonList(new Command(ReservedCommand.player, "!play", "https://www.youtube.com/watch?v=hT47Ysl-2Ew")),
                 CommandParser.parseCommands("!player !play https://www.youtube.com/watch?v=hT47Ysl-2Ew"));
 
         //test multi command with multi command delimiter
@@ -54,11 +49,11 @@ class CommandParserTest {
                 new Command(ReservedCommand.user,"!turkey","")
                 );
         assertEquals(expectedCommands,CommandParser.parseCommands("!player !play https://www.youtube.com/watchmedoggy start=10-> !turkey"));
-        assertEquals(Arrays.asList(new Command(ReservedCommand.add,"!banjo","!player !play https://youtube.com/swag -> !turkey -> !papa")),
+        assertEquals(Collections.singletonList(new Command(ReservedCommand.add, "!banjo", "!player !play https://youtube.com/swag -> !turkey -> !papa")),
                 CommandParser.parseCommands("!add !banjo !player !play https://youtube.com/swag -> !turkey -> !papa"));
     }
     @Test
-    public void testRegexParse() {
+    void testRegexParse() {
         String test ="!player !play <link> !player !play <other link> ";
         List<String> resultList = CommandParser.testRegexParse(test,CommandParser.allEncompasingPattern);
         List<String> expectedList = Arrays.asList("!player !play <link>","!player !play <other link>");
@@ -74,7 +69,7 @@ class CommandParserTest {
         assertEquals(expectedList,CommandParser.testRegexSplit(test,CommandParser.multiCommandDelimiterRegex));
     }
     @Test
-    public void testOptionalArgs() {
+    void testOptionalArgs() {
         String strCommand = "!player !play youtube.skynet/watch?v=abc123 start=10 end=30 volume=10";
         List<Command> parsedCommands = CommandParser.parseCommands(strCommand);
         Map<String,String> expectedOptionalArgs = new HashMap<>();
@@ -82,10 +77,10 @@ class CommandParserTest {
         expectedOptionalArgs.put("end","30");
         expectedOptionalArgs.put("volume","10");
         Command expectedCommand = new Command(ReservedCommand.player,expectedOptionalArgs,"!play","youtube.skynet/watch?v=abc123");
-        assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain optional args");
+        assertEquals(Collections.singletonList(expectedCommand),parsedCommands,"Expected parsed command to contain optional args");
     }
     @Test
-    public void benchmarkCommandParser() {
+    void benchmarkCommandParser() {
         String strCommand = "!add !player !play <linK>";
         String strCommand2 = "!player !play <link> !player !play <other link> start=20 volume=30 end=10";
 
@@ -95,21 +90,21 @@ class CommandParserTest {
         }
     }
     @Test
-    public void testPlayLocalCommands() {
+    void testPlayLocalCommands() {
         String strCommand = "!player !playlocal perfectdark/soundwave.mp3";
         List<Command> parsedCommands = CommandParser.parseCommands(strCommand);
         Command expectedCommand = new Command(ReservedCommand.player,"!playlocal","perfectdark/soundwave.mp3");
-        assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain wave file");
+        assertEquals(Collections.singletonList(expectedCommand),parsedCommands,"Expected parsed command to contain wave file");
     }
     @Test
-    public void testPlayerLocalMusicCommand() {
+    void testPlayerLocalMusicCommand() {
         String strCommand = "!player !localmusic pnbajamclips/turtleme";
         List<Command> parsedCommands = CommandParser.parseCommands(strCommand);
         Command expectedCommand = new Command(ReservedCommand.player,"!localmusic","pnbajamclips/turtleme");
-        assertEquals(Arrays.asList(expectedCommand),parsedCommands,"Expected parsed command to contain directory");
+        assertEquals(Collections.singletonList(expectedCommand),parsedCommands,"Expected parsed command to contain directory");
     }
     @Test
-    public void testSearchAndReplaceForNumbersInCommands() {
+    void testSearchAndReplaceForNumbersInCommands() {
         String text = "!player !playlocal 401";
         String result = CommandParser.searchAndReplace(text,CommandParser.replaceDigitsAfterPlayLocalCommandPattern,(str)-> {
             int i = Integer.parseInt(str);

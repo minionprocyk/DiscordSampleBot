@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.lang.reflect.Executable;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -22,12 +21,11 @@ public class CommandParser {
     private static final String reservedCommandRegex;
     private static final String reservedPlayerCommandRegex;
     private static final String subCommandRegex;
-    private static final String singleLineCommandRegex;
     static {
         //generate reserved command or regex
         StringBuilder builder = new StringBuilder(100);
         for (ReservedCommand reservedCommand : ReservedCommand.values()) {
-            builder.append("(\\b"+reservedCommand.name()+"\\b)|");
+            builder.append("(\\b").append(reservedCommand.name()).append("\\b)|");
         }
         builder.deleteCharAt(builder.lastIndexOf("|"));
         reservedCommandRegex = builder.toString();
@@ -35,59 +33,55 @@ public class CommandParser {
         //generate resrvedcommand.playercommand or regex
         builder = new StringBuilder(100);
         for (ReservedCommand.PlayerCommands reservedCommand : ReservedCommand.PlayerCommands.values()) {
-            builder.append("(\\b"+reservedCommand.name()+"\\b)|");
+            builder.append("(\\b").append(reservedCommand.name()).append("\\b)|");
         }
         builder.deleteCharAt(builder.lastIndexOf("|"));
         reservedPlayerCommandRegex = builder.toString();
 
-        //generate single line command regex
-        builder = new StringBuilder(100);
-        for(ReservedCommand reservedCommand : ReservedCommand.values()) {
-            if(reservedCommand.isSingleLineCommand()) {
-                builder.append("(\\b").append(reservedCommand.name()).append("\\b)").append("|");
-            }
-        }
-        builder.deleteCharAt(builder.lastIndexOf("|"));
-        singleLineCommandRegex = builder.toString();
+//        //generate single line command regex
+//        builder = new StringBuilder(100);
+//        for(ReservedCommand reservedCommand : ReservedCommand.values()) {
+//            if(reservedCommand.isSingleLineCommand()) {
+//                builder.append("(\\b").append(reservedCommand.name()).append("\\b)").append("|");
+//            }
+//        }
+//        builder.deleteCharAt(builder.lastIndexOf("|"));
         //generate reservedcommand.allSubCommand or regex
         subCommandRegex=reservedPlayerCommandRegex;
     }
 
-    public static final String capture_reservedCommand="reservedCommand";
-    public static final String capture_line="line";
-    public static final String capture_command="command";
-    public static final String capture_value="value";
-    public static final String userAddRegex = String.format("(?<%s>^![\\w]+)\\s(?<%s>.*)",capture_command,capture_value);
-    public static final String userCommandRegex = String.format("(?<%s>^![\\w]+)",capture_command);
 
-    public static final String commandArgumentsRegex = "((?<=\\s)\\w+=[^\\s]+)(?<!\\s)";
-    public static final String getCapture_reservedPlayerCommand = String.format("((?<=!)(%s))", reservedPlayerCommandRegex);
-    public static final String getCapture_reservedCommand = String.format("((?<=!)(%s))", reservedCommandRegex);
-    public static final String allEncompasingRegex= String.format("(?<%s>(!(\\w+))\\s*(!(%s))?([^!]*)(?<!\\s))",capture_command,subCommandRegex);
-    public static final String replaceDigitsAfterPlayLocalCommand = "(?<=\\Q!playlocal\\E\\s?)(\\d+)";
+    static final String capture_command="command";
+    private static final String capture_value="value";
+    private  static final String userAddRegex = String.format("(?<%s>^![\\w]+)\\s(?<%s>.*)",capture_command,capture_value);
+    private  static final String userCommandRegex = String.format("(?<%s>^![\\w]+)",capture_command);
+
+    private static final String commandArgumentsRegex = "((?<=\\s)\\w+=[^\\s]+)(?<!\\s)";
+//    public static final String getCapture_reservedPlayerCommand = String.format("((?<=!)(%s))", reservedPlayerCommandRegex);
+    private static final String getCapture_reservedCommand = String.format("((?<=!)(%s))", reservedCommandRegex);
+    private static final String allEncompasingRegex= String.format("(?<%s>(!(\\w+))\\s*(!(%s))?([^!]*)(?<!\\s))",capture_command,subCommandRegex);
+    private static final String replaceDigitsAfterPlayLocalCommand = "(?<=\\Q!playlocal\\E\\s?)(\\d+)";
     /**
      * Additional delimiters that can be used to daisy chain commands
      */
-    public static final String multiCommandDelimiterRegex = "\\s*((->)|($=>$))\\s*";
+    static final String multiCommandDelimiterRegex = "\\s*((->)|(\\$=>\\$))\\s*";
 
-    public static final Pattern userAddCommandPattern = Pattern.compile(userAddRegex);
-    public static final Pattern userCommandPattern = Pattern.compile(userCommandRegex);
-    public static final Pattern allEncompasingPattern = Pattern.compile(allEncompasingRegex);
-    public static final Pattern resrvedCommandPattern = Pattern.compile(getCapture_reservedCommand);
-    public static final Pattern reservedPlayerCommandPattern = Pattern.compile(reservedPlayerCommandRegex);
-    public static final Pattern optionalArgumentsPattern = Pattern.compile(commandArgumentsRegex);
-    public static final Pattern replaceDigitsAfterPlayLocalCommandPattern = Pattern.compile(replaceDigitsAfterPlayLocalCommand);
+    private static final Pattern userAddCommandPattern = Pattern.compile(userAddRegex);
+    static final Pattern userCommandPattern = Pattern.compile(userCommandRegex);
+    static final Pattern allEncompasingPattern = Pattern.compile(allEncompasingRegex);
+    static final Pattern resrvedCommandPattern = Pattern.compile(getCapture_reservedCommand);
+    private static final Pattern reservedPlayerCommandPattern = Pattern.compile(reservedPlayerCommandRegex);
+    private static final Pattern optionalArgumentsPattern = Pattern.compile(commandArgumentsRegex);
+    static final Pattern replaceDigitsAfterPlayLocalCommandPattern = Pattern.compile(replaceDigitsAfterPlayLocalCommand);
 //    public static final Pattern multiCommandPattern = Pattern.compile(multiCommandDelimiterRegex);
 
-    private String prefix;
-    private String[] multiDelimiters;
     @Inject
     public CommandParser(@Named("prefix") String prefix, @Named("multi_delimiter") String[] multiDelimiters) {
-        this.prefix=prefix;
-        this.multiDelimiters=multiDelimiters;
+        String prefix1 = prefix;
+        String[] multiDelimiterss=multiDelimiters;
     }
 
-    public static List<String> testRegexParse(String s, Pattern pattern) {
+    static List<String> testRegexParse(String s, Pattern pattern) {
         Matcher matcher = pattern.matcher(s);
         List<String> result=new ArrayList<>();
         while(matcher.find()) {
@@ -95,13 +89,13 @@ public class CommandParser {
         }
         return result;
     }
-    public static List<String> testRegexSplit(String s, String regex) {
+    static List<String> testRegexSplit(String s, String regex) {
         return Arrays.asList(s.split(regex));
     }
 
     /**
-     *
-     * @param val
+     * Accepts a string that is in seconds format and converts it into decimal format
+     * @param val A String representing seconds format of a number
      * @return A long value representing milliseconds from a decimal.
      * 0 if any error occured
      */
@@ -116,10 +110,10 @@ public class CommandParser {
         }
         return 0;
     }
-    public static Command parseCommand(String value) {
+    static Command parseCommand(String value) {
         return parseCommand(value,false);
     }
-    public static ReservedCommand.PlayerCommands parsePlayerCommand(String value) {
+    static ReservedCommand.PlayerCommands parsePlayerCommand(String value) {
         if(StringUtils.isNotBlank(value)) {
             Matcher reservedCommandMatcher = reservedPlayerCommandPattern.matcher(value);
             if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
@@ -129,13 +123,12 @@ public class CommandParser {
         }
         return ReservedCommand.PlayerCommands.error;
     }
-    public static ReservedCommand parseReservedCommand(String value) {
+    private static ReservedCommand parseReservedCommand(String value) {
         if(StringUtils.isNotBlank(value)) {
             Matcher reservedCommandMatcher = resrvedCommandPattern.matcher(value);
             if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
                 String strReservedCommand = reservedCommandMatcher.group();
-                ReservedCommand reservedCommand = ReservedCommand.valueOf(strReservedCommand);
-                return reservedCommand;
+                return ReservedCommand.valueOf(strReservedCommand);
             }
             else {
                 return ReservedCommand.user;
@@ -149,23 +142,12 @@ public class CommandParser {
      * @param value The string to evaluate
      * @return A {@code Command } representing the input source
      */
-    public static Command parseCommand(String value,boolean grabWholeTextAsValue) {
+    private static Command parseCommand(String value,boolean grabWholeTextAsValue) {
         Command returnCommand = new Command();
         Map<String,String> optionalArgsMap = new HashMap<>();
-        String command = "";
-        String entry = "";
-//        if(StringUtils.isNotBlank(value)) {
-//            Matcher reservedCommandMatcher = resrvedCommandPattern.matcher(value);
-//            if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
-//                String strReservedCommand = reservedCommandMatcher.group();
-//                ReservedCommand reservedCommand = ReservedCommand.valueOf(strReservedCommand);
-//                value = removePrefix(value.replaceFirst(strReservedCommand, "")).trim();
-//                returnCommand.setReservedCommand(reservedCommand);
-//            }
-//            else {
-//                returnCommand.setReservedCommand(ReservedCommand.user);
-//            }
-//        }
+        String command ;
+        String entry ;
+
         ReservedCommand reservedCommand = parseReservedCommand(value);
         if(reservedCommand.isNonUserCommand()) {
             value = removePrefix(value.replaceFirst(reservedCommand.name(), "")).trim();
@@ -206,24 +188,22 @@ public class CommandParser {
      * Parsers a string of text to retrieve one or more commands determined by
      * a contained multi value delimiter. This approach will fill the command object
      * with its corresponding ReservedCommand and perform any sanitization required
-     * @param value
-     * @return
+     * @param value A line representing a user request
+     * @return A list of commands
      */
-    public static List<Command> parseCommands(String value) {
+    static List<Command> parseCommands(String value) {
         List<Command> commands = new ArrayList<>();
         ReservedCommand reservedCommand = parseReservedCommand(value);
         if(reservedCommand.isSingleLineCommand()) {
-            Command command=null;
-            ReservedCommand lastReservedCommand =reservedCommand;
+            Command command;
             command = parseCommand(value.substring(reservedCommand.name().length()+1).trim(),true);
-            command.setReservedCommand(lastReservedCommand);
+            command.setReservedCommand(reservedCommand);
             commands.add(command);
         }
         else {
             String[] matches = value.split(multiCommandDelimiterRegex);
             for (String strMatch : matches) {
-                String strLineCommand = strMatch;
-                Matcher allEncompasing = allEncompasingPattern.matcher(strLineCommand);
+                Matcher allEncompasing = allEncompasingPattern.matcher(strMatch);
                 while (allEncompasing.find()) {
                     String strCommand = allEncompasing.group(capture_command);
                     Command command = parseCommand(strCommand);

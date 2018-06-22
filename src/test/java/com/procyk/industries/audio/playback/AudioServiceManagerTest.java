@@ -7,13 +7,6 @@ import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AudioServiceManagerTest {
     @Inject
@@ -26,19 +19,25 @@ public class AudioServiceManagerTest {
         Guice.createInjector(new CommandServiceModule(),new BotModule(),new AudioServiceModule()).injectMembers(this);
     }
 
-    @Test
-    public void testLocalPathFromIndex() {
-        int songIndex=3;
-        String result = audioServiceManager.getSavableLocalTrackAsString(songIndex);
-        assertEquals("pnbajamclips",result);
-        result = audioServiceManager.getSavableLocalTrackAsString(200);
-        assertEquals("perfect.dark_.xbla-soundpack/fx/00000275_11025.wav",result);
-
-    }
-    @Test
-    public void testTrimRootPath() {
-        List<Path> files = audioServiceManager.getSongsInDirectory("pnbajamclips");
-        assertEquals("pnbajamclips",audioServiceManager.trimRootPath(files.get(0).toString()));
-    }
+    //These tests are deprecated and removed because they're specific to my implementation
+//    @Test
+//    public void testLocalPathFromIndex() {
+//        int songIndex=3;
+//        String result = audioServiceManager.getSavableLocalTrackAsString(songIndex);
+//        assertEquals("pnbajamclips",result);
+//        result = audioServiceManager.getSavableLocalTrackAsString(200);
+//        assertEquals("perfect.dark_.xbla-soundpack/fx/00000275_11025.wav",result);
+//
+//    }
+//    @Test
+//    public void testTrimRootPath() {
+//        List<Path> files = null;
+//        try {
+//            files = audioServiceManager.getSongsInDirectory("pnbajamclips");
+//        } catch (IOException e) {
+//            fail("Directory does not exist for LocalMusic");
+//        }
+//        assertEquals("pnbajamclips",audioServiceManager.trimRootPath(files.get(0).toString()));
+//    }
 
 }

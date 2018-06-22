@@ -10,11 +10,16 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BotModuleTest {
+class BotModuleTest {
     @Test
-    public void testTokenPath() {
+    void testTokenPath() {
 
-        Path path = Paths.get(getClass().getClassLoader().getResource("token").getPath());
+        Path path = null;
+        try {
+            path = Paths.get(getClass().getClassLoader().getResource("token").getPath());
+        } catch (Exception e) {
+            fail("Token file does not exist in project directory");
+        }
         Properties properties = new Properties();
         String result="";
         try {

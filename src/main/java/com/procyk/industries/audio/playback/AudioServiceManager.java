@@ -60,7 +60,7 @@ public class AudioServiceManager {
      * Lists all items, directories and files, contained within the folder specified off of the LocalMusic
      * root directory. If the directory parameter is empty then the root path will be listed instead.
      * @param directory Directory off of LocalMusic root directory
-     * @return
+     * @return A list of song Path in the requested directory
      */
     public List<Path> getSongsInDirectory(String directory) throws IOException {
         directory = directory == null ? "" : directory;
@@ -104,19 +104,19 @@ public class AudioServiceManager {
     }
     public void loadWithArgs(Command command) {
         //get the stuff
-        String start = command.getOptionalArg("start");
-        String end = command.getOptionalArg("end");
-        String volume = command.getOptionalArg("volume");
-        long lstart=0,lend=0;
-        int lvolume=0;
+        String strStart = command.getOptionalArg("start");
+        String strEnd = command.getOptionalArg("end");
+        String strVolume = command.getOptionalArg("volume");
+        long start,end;
+        int volume=0;
 
-        lstart = CommandParser.parseSecondsToMillisDecimalFormat(start);
-        lend = CommandParser.parseSecondsToMillisDecimalFormat(end);
+        start = CommandParser.parseSecondsToMillisDecimalFormat(strStart);
+        end = CommandParser.parseSecondsToMillisDecimalFormat(strEnd);
 
-        if(StringUtils.isNotBlank(volume)) {
-            lvolume = Integer.parseInt(volume);
+        if(StringUtils.isNotBlank(strVolume)) {
+            volume = Integer.parseInt(strVolume);
         }
-        AudioTrackUserData audioTrackUserData = new AudioTrackUserData(lvolume,lstart,lend);
+        AudioTrackUserData audioTrackUserData = new AudioTrackUserData(volume,start,end);
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
         audioLoadResultHandler.setTrackInfo(audioTrackUserData);
         audioLoadResultHandlerNew.setTrackInfo(audioTrackUserData);

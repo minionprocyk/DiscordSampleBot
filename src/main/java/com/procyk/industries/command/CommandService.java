@@ -19,10 +19,10 @@ public class CommandService {
     }
 
     /**
-     *
-     * @param reservedCommand
-     * @param command
-     * @param event
+     * Takes a {@code Command} object and forwards it to the appropriate method provided by the {@code CommandExecutor}
+     * @param reservedCommand A preset command built into the bot
+     * @param command The user Command
+     * @param event The event received by JDA
      */
     private void performReservedCommand(ReservedCommand reservedCommand, Command command, MessageReceivedEvent event) {
         MessageChannel messageChannel = event.getChannel();
@@ -78,7 +78,7 @@ public class CommandService {
                 break;
             case notify:
             case notifyme:
-                //commandExecutor.notify(messageChannel,member,command);
+                commandExecutor.notifyme(messageChannel,member,command);
                 break;
             case player:
                 commandExecutor.playerCommands(messageChannel, command);
@@ -110,9 +110,8 @@ public class CommandService {
         if(event.getAuthor().isBot())return;
         String messageContent = message.getContent().toString();
         CommandParser.parseCommands(messageContent)
-                .stream()
-                .forEach(command -> {
-                    performReservedCommand(command.getReservedCommand(),command,event);
-                });
+                .forEach(command ->
+                    performReservedCommand(command.getReservedCommand(),command,event)
+                );
     }
 }

@@ -18,7 +18,7 @@ class CommandTest {
         String key = "!linkme";
         String reflexiveCommand = "!learner !learn link.html";
         Command command = new Command(key,reflexiveCommand);
-        assertTrue(command.isReflexive()==false,"Expected "+reflexiveCommand+" to not contain ReservedCommand");
+        assertFalse(command.isReflexive(),"Expected "+reflexiveCommand+" to not contain ReservedCommand");
     }
     @Test
     void isReflexiveWithSingleWordCommand() {

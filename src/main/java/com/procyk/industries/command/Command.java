@@ -45,10 +45,11 @@ public class Command implements Map.Entry<String,String>, Serializable {
     /**
      * Checks if the key value matches the name of a {@link ReservedCommand} and is not a {@link ReservedCommand#user}
      * command.
-     * @return
+     * @return True if this command contains a reference to another command, otherwise false
      */
     public boolean isReflexive() {
         Matcher matcher = CommandParser.userCommandPattern.matcher(value);
+        //noinspection CatchMayIgnoreException
         try {
             if(matcher.find()) {
                 String command = matcher.group(CommandParser.capture_command);
@@ -110,9 +111,9 @@ public class Command implements Map.Entry<String,String>, Serializable {
     public String getFormattedString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(value);
-        optionalArgsToValue.forEach((k,v)-> {
-            stringBuilder.append(" ").append(k).append("=").append(v);
-        });
+        optionalArgsToValue.forEach((k,v)->
+            stringBuilder.append(" ").append(k).append("=").append(v)
+        );
         return stringBuilder.toString();
     }
     @Override

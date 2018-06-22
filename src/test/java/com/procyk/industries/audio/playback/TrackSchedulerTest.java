@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,15 +17,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class TrackSchedulerTest {
-    TrackScheduler scheduler;
-    AudioPlayer audioPlayer;
+    private TrackScheduler scheduler;
 
-    List<AudioTrack> trackList;
-    AudioTrack track;
-    AudioTrack[] tracks;
+    private List<AudioTrack> trackList;
+    private AudioTrack track;
+    private AudioTrack[] tracks;
     @BeforeEach
-    public void setup() {
-        audioPlayer = mock(AudioPlayer.class);
+    void setup() {
+        AudioPlayer audioPlayer = mock(AudioPlayer.class);
         when(audioPlayer.getPlayingTrack()).thenReturn(mock(AudioTrack.class));
         when(audioPlayer.getPlayingTrack().getInfo()).thenReturn(mock(AudioTrackInfo.class));
         scheduler = new TrackScheduler(audioPlayer);
@@ -47,7 +45,7 @@ class TrackSchedulerTest {
         }
     }
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         scheduler=null;
         trackList.clear();
         tracks=null;
@@ -83,8 +81,8 @@ class TrackSchedulerTest {
         Object[] newNames = new Object[names.length*2];
         int count=0;
         for(int i=0;i<2;i++) {
-            for (int i1 = 0; i1 < names.length; i1++) {
-                newNames[count++]=names[i1];
+            for (Object name : names) {
+                newNames[count++] = name;
             }
         }
         //make sure previous doesnt go beyond scope after exceeding size

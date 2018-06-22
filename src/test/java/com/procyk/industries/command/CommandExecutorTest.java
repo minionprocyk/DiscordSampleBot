@@ -16,10 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.*;
 
-public class CommandExecutorTest {
+class CommandExecutorTest {
     Map<String,String> commands;
     @Inject
     CommandExecutor commandExecutor;
@@ -56,10 +55,7 @@ public class CommandExecutorTest {
         commandExecutor.deleteCommand(messageChannel,member,command);
         commandExecutor.editCommand(messageChannel,member,command);
     }
-    @Test
-    public void testReflexiveCommands() {
 
-    }
     @Test
     public void testSuggestCommands() {
         String testCommand= "!test";

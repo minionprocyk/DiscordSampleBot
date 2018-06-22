@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 public class AudioLoadResultHandlerImpl implements AudioLoadResultHandler {
     private final TrackScheduler trackScheduler;

@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 public class BotModule extends AbstractModule{
 
@@ -63,10 +62,5 @@ public class BotModule extends AbstractModule{
         }
         return null;
     }
-    @Override
-    protected void configure() {
-        super.configure();
-//        bind(ListenerAdapter.class).to(OnMessageReceivedImpl.class);
-//        bind(ListenerAdapter.class).to(OnBotShutdownImpl.class);
-    }
+
 }

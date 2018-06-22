@@ -8,7 +8,7 @@ public class Strings implements StringMatcher{
      * @param b char
      * @return True if a matches b irrespective of case
      */
-    public static boolean charAlmostMatches(char a, char b) {
+    private static boolean charAlmostMatches(char a, char b) {
         return Character.toLowerCase(a) == Character.toLowerCase(b);
     }
 
@@ -17,7 +17,7 @@ public class Strings implements StringMatcher{
      * from left to right up to the length of the smallest input as determined by {@link #charAlmostMatches(char, char)}
      * @return A StringMatcher who matches character from left to right.
      */
-    public static StringMatcher almostMatchesByFront() {
+    private static StringMatcher almostMatchesByFront() {
         return (text,match,allowedErrors) -> {
             char[] textChars = text.toCharArray();
             char[] matchChars = match.toCharArray();
@@ -44,7 +44,7 @@ public class Strings implements StringMatcher{
      *
      * @return A StringMatcher who matches character from left to right and right to left.
      */
-    public static StringMatcher almostMatchesByFrontAndBackIgnoringLength() {
+     static StringMatcher almostMatchesByFrontAndBackIgnoringLength() {
         return (text,match,allowedErrors) -> {
             char[] textChars = text.toCharArray();
             char[] matchChars = match.toCharArray();
@@ -85,18 +85,12 @@ public class Strings implements StringMatcher{
                 int fromRight = higherArray.length-fromLeft;
                 if(!charAlmostMatches(compare,higherArray[fromLeft])
                         && !charAlmostMatches(compare, higherArray[fromRight])) {
-                    if (++errors > allowedErrors)
-                        return false;
+                    return ++errors <= allowedErrors;
                 }
             }
             return true;
         };
     }
-
-    /**
-      Performs a more relaxed string search to check if two strings are equal. Ignores casing and allowed n number of errors.
-      Will also match if the beginning of the match string loosely matches the beginning of the text.
-     */
 
     /**
      *  Performs a more relaxed string search to check if two strings are equal. Ignores casing and allowed n number of errors.
