@@ -78,6 +78,9 @@ class CommandServiceTest {
         message = new Message("!zzTestTony");
         commandService.performUserRequest(messageReceivedEvent,message);
 
+        //delete the command
+        message = new Message("!delete !zzTestTony");
+        commandService.performUserRequest(messageReceivedEvent,message);
 
     }
 

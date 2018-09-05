@@ -2,6 +2,8 @@ package com.procyk.industries.command;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.procyk.industries.module.AudioServiceModule;
+import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +20,10 @@ class CommandStoreTest {
     private final Command command = new Command("!unit_test_command_store","test value");
     @BeforeEach
     void setup() {
-        Injector injector = Guice.createInjector(new CommandServiceModule());
+        Injector injector = Guice.createInjector(new BotModule(), new AudioServiceModule(), new CommandServiceModule());
         commandStore = injector.getInstance(CommandStore.class);
-        commands = new HashMap<String, String>()
-        {{
-            put(command.getKey(), command.getValue());
-        }};
+        commands = commandStore.getCommands();
+        commands.put(command.getKey(), command.getValue());
     }
     @AfterEach
     void tearDown() {
@@ -37,4 +37,16 @@ class CommandStoreTest {
                 "Expected command to be added to command store file");
         commandStore.deleteCommand(command);
     }
+
+//
+//    @Test
+//    void testAllCommands() {
+//        System.out.println("insert into commands(name, value) values ");
+//        commandStore.getCommands().forEach((k,v)-> {
+//            System.out.print("(\""+k.toString()+"\", \""+v.toString()+"\"), ");
+//        });
+//        System.out.println(");");
+//    }
+
+
 }

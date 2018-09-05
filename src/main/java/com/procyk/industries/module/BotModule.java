@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import org.sqlite.SQLiteJDBCLoader;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -52,6 +53,9 @@ public class BotModule extends AbstractModule{
                 .setToken(token)
                 .addEventListener(eventListener)
                 .setStatus(OnlineStatus.ONLINE);
+    }
+    @Provides @Named("jdbc_url") String providesJDBCUrl() {
+        return "jdbc:sqlite:commands.db";
     }
     @Provides @Singleton
     JDA providesJDA(JDABuilder jdaBuilder) {
