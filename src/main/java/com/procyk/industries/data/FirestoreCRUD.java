@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class FirestoreCRUD implements CRUDable {
                     )
                     .collect(Collectors.toSet());
         } catch (InterruptedException | ExecutionException e) {
-            logger.severe(e.getMessage());
+            logger.log(Level.SEVERE, "Failed to get commands", e);
         }
         return null;
     }
@@ -50,10 +51,8 @@ public class FirestoreCRUD implements CRUDable {
             ApiFuture<WriteResult> future = db.collection("commands").document(command.getKey()).create(fields);
             try {
                 future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.WARNING,"Command: "+command.toString()+" may already exist",e);
             }
         }
         else {
@@ -63,11 +62,13 @@ public class FirestoreCRUD implements CRUDable {
 
     @Override
     public void removeCommand(Command command) {
+        logger.info("Removing "+command.toString());
         db.collection("commands").document(command.getKey()).delete();
     }
 
     @Override
     public void saveAllCommands(Map<String, String> commands) {
+        logger.info("Saving commands: " +commands.toString());
         commands.forEach((k,v) -> {
             addCommand(new Command(k,v));
         });
