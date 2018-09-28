@@ -92,10 +92,10 @@ public class Command implements Map.Entry<String,String>, Serializable {
         if (this == o) return true;
         if (!(o instanceof Command)) return false;
         Command command = (Command) o;
-        return getReservedCommand() == command.getReservedCommand() &&
+        return //getReservedCommand() == command.getReservedCommand() &&
                 Objects.equals(getKey(), command.getKey()) &&
-                Objects.equals(getValue(), command.getValue()) &&
-                Objects.equals(getOptionalArgsToValue(), command.getOptionalArgsToValue());
+                Objects.equals(getValue(), command.getValue());// &&
+                //Objects.equals(getOptionalArgsToValue(), command.getOptionalArgsToValue());
     }
 
     @Override

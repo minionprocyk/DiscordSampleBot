@@ -1,4 +1,4 @@
-package com.procyk.industries.sql;
+package com.procyk.industries.data;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -9,13 +9,11 @@ import com.procyk.industries.module.CommandServiceModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CRUDTest {
+public class SQLCRUDTest {
     @Inject
-    CRUD crud;
+    SQLCRUD SQLCRUD;
 
     @BeforeEach
     void setup() {
@@ -24,15 +22,15 @@ public class CRUDTest {
     }
     @Test
     void testGetCommands() {
-        assertTrue(crud.getCommands().size()>0);
+        assertTrue(SQLCRUD.getCommands().size()>0);
     }
     @Test
     void testConnect() {
-        crud.connect();
-        crud.createCommandsTable();
-        crud.addCommand(new Command("test","me"));
-        crud.removeCommand(new Command("test","me"));
-        System.out.println(crud.getCommands());
+        SQLCRUD.connect();
+        SQLCRUD.createCommandsTable();
+        SQLCRUD.addCommand(new Command("test","me"));
+        SQLCRUD.removeCommand(new Command("test","me"));
+        System.out.println(SQLCRUD.getCommands());
 
     }
 }
