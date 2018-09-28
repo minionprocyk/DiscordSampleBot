@@ -11,7 +11,9 @@ import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
 import javax.inject.Inject;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -28,15 +30,15 @@ public class CommandServiceModule extends AbstractModule{
     }
     @Provides
     Firestore providesFirestore() throws IOException {
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+        InputStream serviceAccount = getClass().getResourceAsStream("/discordsamplebot-firebase-adminsdk.json");
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(credentials)
                 .setProjectId("discordsamplebot")
                 .build();
-
         FirebaseApp.initializeApp(options);
         FirestoreOptions firestoreOptions =
-                FirestoreOptions.newBuilder().setTimestampsInSnapshotsEnabled(true).build();
+                FirestoreOptions.newBuilder().setCredentials(credentials).setTimestampsInSnapshotsEnabled(true).build();
         Firestore firestore = firestoreOptions.getService();
         return firestore;
     }
