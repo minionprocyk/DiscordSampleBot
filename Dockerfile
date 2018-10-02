@@ -1,3 +1,10 @@
-FROM ubuntu:18.0.4
+FROM gradle:4.10.2-jdk8-alpine
 COPY . /opt/DiscordSampleBot
-CMD /opt/DiscordSampleBot/gradlew run
+WORKDIR /opt/DiscordSampleBot
+
+USER root
+RUN chown -R gradle /opt/DiscordSampleBot
+
+USER gradle
+
+RUN gradle build
