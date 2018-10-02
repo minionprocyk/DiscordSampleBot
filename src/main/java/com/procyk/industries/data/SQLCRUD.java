@@ -1,4 +1,4 @@
-package com.procyk.industries.sql;
+package com.procyk.industries.data;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class CRUD {
+public class SQLCRUD implements CRUDable {
     private final String url;
-    private final Logger logger = Logger.getLogger(CRUD.class.getName());
+    private final Logger logger = Logger.getLogger(SQLCRUD.class.getName());
 
     @Inject
-    public CRUD(@Named("jdbc_url")String url) {
+    public SQLCRUD(@Named("jdbc_url")String url) {
         this.url=url;
     }
     public void saveAllCommands(Map<String,String> commands) {

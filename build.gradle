@@ -8,8 +8,12 @@ repositories {
 }
 
 dependencies {
+<<<<<<< HEAD
     compile group: 'com.google.firebase', name: 'firebase-admin', version: '5.5.0'
 
+=======
+    compile group: 'com.google.firebase', name: 'firebase-admin', version: '6.5.0'
+>>>>>>> 4bab0580f7d4c862151c67958562f2f6adff5430
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     implementation 'net.dv8tion:JDA:3.5.0_329'
     implementation group: 'com.google.inject', name: 'guice', version: '4.2.0'

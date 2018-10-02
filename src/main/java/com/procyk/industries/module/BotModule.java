@@ -14,7 +14,7 @@ import org.sqlite.SQLiteJDBCLoader;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,11 +23,11 @@ import java.util.Properties;
 public class BotModule extends AbstractModule{
 
     @Provides @Named("token") String providesToken() {
-        Path path = Paths.get(getClass().getClassLoader().getResource("token").getPath());
+        InputStream in = getClass().getResourceAsStream("/token");
         Properties properties = new Properties();
         String result="";
         try {
-            properties.load(Files.newInputStream(path));
+            properties.load(in);
             result = properties.getProperty("token");
         } catch (IOException e) {
             e.printStackTrace();

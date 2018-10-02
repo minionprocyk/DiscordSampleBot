@@ -1,34 +1,28 @@
 package com.procyk.industries.command;
 
-import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
-import com.procyk.industries.sql.CRUD;
-import org.sqlite.SQLiteJDBCLoader;
+import com.procyk.industries.data.CRUDable;
+import com.procyk.industries.data.FirestoreCRUD;
+import com.procyk.industries.data.SQLCRUD;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.READ;
 
 @Singleton
 public class CommandStore {
     private static final Logger logger = Logger.getLogger(CommandStore.class.getName());
     private static final Properties properties = new Properties();
     private final Path fileStorePath;
-    private final CRUD crud;
+    private final CRUDable crud;
+
     @Inject
-    public CommandStore(@Named("APP_PATH")Path appPath, @Named("commands_store")String fileName, CRUD crud) {
+    public CommandStore(@Named("APP_PATH")Path appPath, @Named("commands_store")String fileName, FirestoreCRUD crud) {
         fileStorePath = appPath.resolve(fileName);
         this.crud=crud;
     }
