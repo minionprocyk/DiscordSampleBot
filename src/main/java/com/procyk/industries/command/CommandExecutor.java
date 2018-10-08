@@ -300,6 +300,28 @@ public class CommandExecutor {
     }
 
     /**
+     * Expects two arguments where the name of the second takes the place of the first. For instance !rename !aw_jeez !awjeez
+     * will replace the name of the argument !aw_jeez with the new alias !awjeez.
+     * @param messageChannel
+     * @param command
+     */
+    void renameCommand(MessageChannel messageChannel, Member member, Command command) {
+        String cmd=null;
+        if(StringUtils.isNotEmpty(command.getKey())
+        && StringUtils.isNotEmpty(command.getValue())
+        && StringUtils.containsWhitespace(command.getValue().trim()) == false
+        && (cmd = commands.get(command.getKey()))!=null) {
+            deleteCommand(messageChannel, member, command);
+            addCommand(messageChannel, new Command(command.getValue(), cmd));
+            MessageHandler.sendMessage(messageChannel, "Renamed "+command.getKey()+" to "+command.getValue());
+        }
+        else {
+            MessageHandler.sendMessage(messageChannel, "Could not rename command. It should follow this format: "
+            + "[!rename !original !new].");
+        }
+    }
+
+    /**
      * Selects a random user-created command and performs that action as if a user requested it.
      * @param messageChannel Discord message channel
      * @return A string representing a user requested available command

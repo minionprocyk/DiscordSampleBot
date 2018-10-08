@@ -63,7 +63,11 @@ public class FirestoreCRUD implements CRUDable {
     @Override
     public void removeCommand(Command command) {
         logger.info("Removing "+command.toString());
-        db.collection("commands").document(command.getKey()).delete();
+        try {
+            db.collection("commands").document(command.getKey()).delete().get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.WARNING, "Failed to delete command "+command.toString());
+        }
     }
 
     @Override

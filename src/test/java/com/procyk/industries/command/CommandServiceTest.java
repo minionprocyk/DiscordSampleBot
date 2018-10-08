@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.requests.restaction.MessageAction;
@@ -46,6 +47,8 @@ class CommandServiceTest {
         when(user.isBot()).thenReturn(false);
         doNothing().when(messageAction).queue();
         when(messageChannel.sendMessage((String)notNull())).thenReturn(messageAction);
+        when(member.getUser()).thenReturn(user);
+        when(member.hasPermission(Permission.ADMINISTRATOR)).thenReturn(true);
 
         //mock message receive events
         when(messageReceivedEvent.getAuthor()).thenReturn(user);

@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -42,6 +43,7 @@ class CommandExecutorTest {
         member = mock(Member.class);
         user = mock(User.class);
         when(member.getUser()).thenReturn(user);
+        when(member.hasPermission(Permission.ADMINISTRATOR)).thenReturn(true);
         when(user.getName()).thenReturn("bob");
     }
     @AfterEach
@@ -68,6 +70,15 @@ class CommandExecutorTest {
         Map<String,String> optionalArgs = new HashMap<>();
         Command command = new Command(ReservedCommand.group,optionalArgs,"!spongebob","!icecream");
         commandExecutor.groupCommands(messageChannel,member,command);
+    }
+    @Test
+    void testRenameCommand() {
+        Command command = new Command("!zzOriginal", "this is some command");
+        Command rename = new Command(ReservedCommand.rename, "!zzOriginal", "!zzNew");
+        Command delete = new Command("!zzNew", "this is some command");
+        commandExecutor.addCommand(messageChannel, command);
+        commandExecutor.renameCommand(messageChannel,member, rename);
+        commandExecutor.deleteCommand(messageChannel, member, delete);
     }
 
 }

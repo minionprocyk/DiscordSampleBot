@@ -76,6 +76,9 @@ public class CommandService {
                 break;
             case record:
                 break;
+            case rename:
+                commandExecutor.renameCommand(messageChannel, member, command);
+                break;
             case notify:
             case notifyme:
                 commandExecutor.notifyme(messageChannel,member,command);

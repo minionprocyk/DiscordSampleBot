@@ -2,7 +2,7 @@ package com.procyk.industries.command;
 
 
 public enum ReservedCommand {
-    add ,edit,delete,group,leave,join,shutdown,commands,record,notify,notifyme,player,random, user,test,none ;
+    add ,edit,delete,group,leave,join,shutdown,commands,record,rename,notify,notifyme,player,random, user,test,none ;
 
     public enum PlayerCommands{
         commands,skip,next,pause,stop,last,previous,playlist,resume,add,clear,play,queue,seek,volume, localmusic,
