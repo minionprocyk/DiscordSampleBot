@@ -122,4 +122,15 @@ class CommandParserTest {
         assertEquals("!player !playlocal 402 start=0.1 end=0.8",result,"Expected 401 to be incremented to 402");
 
     }
+    @Test
+    void testParseRenameCommand() {
+        String text = "!rename !zzOriginal !zzNew";
+        Command cmd = CommandParser.parseCommand(text);
+        assertEquals(ReservedCommand.rename, cmd.getReservedCommand());
+        assertEquals("!zzOriginal", cmd.getKey());
+        assertEquals("!zzNew", cmd.getValue());
+
+        List<Command> cmds = CommandParser.parseCommands(text);
+        assertEquals(cmds.get(0),cmd);
+    }
 }

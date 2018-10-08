@@ -18,6 +18,6 @@ public enum ReservedCommand {
     }
     public boolean isSingleLineCommand() {
         return this == add || this == delete || this == edit || this == join || this == leave ||
-                this == commands || this == shutdown || this == group;
+                this == commands || this == shutdown || this == group || this == rename;
     }
 }
