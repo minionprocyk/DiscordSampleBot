@@ -42,16 +42,16 @@ public class BotModule extends AbstractModule{
     }
     @Provides ListenerAdapter[] providesListenerAdapters(OnMessageReceivedImpl onMessageReceived, OnBotShutdownImpl onBotShutdown) {
         return new ListenerAdapter[]{
-                onMessageReceived,
+            onMessageReceived,
                 onBotShutdown
         };
     }
 
     @Provides
-    JDABuilder providesJDABuilder(@Named("token") String token, ListenerAdapter eventListener) {
+    JDABuilder providesJDABuilder(@Named("token") String token, ListenerAdapter[] eventListener) {
         return new JDABuilder(AccountType.BOT)
                 .setToken(token)
-                .addEventListener(eventListener)
+                .addEventListener((Object[])eventListener)
                 .setStatus(OnlineStatus.ONLINE);
     }
     @Provides @Named("jdbc_url") String providesJDBCUrl() {
