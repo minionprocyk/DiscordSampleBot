@@ -48,7 +48,7 @@ public class BotModule extends AbstractModule{
     }
 
     @Provides
-    JDABuilder providesJDABuilder(@Named("token") String token, ListenerAdapter... eventListener) {
+    JDABuilder providesJDABuilder(@Named("token") String token, ListenerAdapter eventListener) {
         return new JDABuilder(AccountType.BOT)
                 .setToken(token)
                 .addEventListener(eventListener)
