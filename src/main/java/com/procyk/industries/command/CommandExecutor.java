@@ -1,5 +1,10 @@
 package com.procyk.industries.command;
 
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.common.base.Joiner;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
@@ -17,6 +22,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -27,12 +33,15 @@ public class CommandExecutor {
     private final CommandStore commandStore;
     private final AudioServiceManager audioServiceManager;
     private final Strings specialStringsUtil;
+    private final YouTube youtube;
     @Inject
-    public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings) {
+    public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
+                           YouTube youTube) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
+        this.youtube=youTube;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
@@ -142,6 +151,7 @@ public class CommandExecutor {
                 }
                 else {
                     audioServiceManager.loadWithArgs(command);
+                    MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
                 }
                 break;
             case seek:
@@ -344,6 +354,31 @@ public class CommandExecutor {
             MessageHandler.sendMessage(messageChannel, member.getUser().getName()+" doesn't have permission to do that :stuck_out_tongue_winking_eye: ");
         }
 
+    }
+
+    /**
+     * Searches youtube using the provided text and plays from the resulting list.
+     * @param messageChannel
+     * @param member
+     * @param command
+     */
+    List<SearchResult> searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
+        String query = command.getValue();
+
+        try {
+            YouTube.Search.List search = youtube.search().list("id, snippet");
+            search.setQ(query);
+            search.setKey(apiKey);
+            search.setType("video");
+            search.setFields("items(id/videoId)");
+            search.setMaxResults(5L);
+
+            SearchListResponse searchListResponse = search.execute();
+            return searchListResponse.getItems();
+        } catch (IOException e) {
+            logger.warn("Failed to query search term: "+query, e);
+        }
+        return null;
     }
     /**
      * Check if user command contains a key and value. A key only reference will search a map of commands for an

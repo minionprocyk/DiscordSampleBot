@@ -181,6 +181,9 @@ public class CommandParser {
             command = userCommandMatcher.group(capture_command);
             returnCommand.setKey(command);
         }
+        else if(reservedCommand.isFullLineCommand()){
+            returnCommand.setValue(value);
+        }
 
         return returnCommand;
     }

@@ -1,21 +1,26 @@
 package com.procyk.industries.command;
 
+import com.google.api.services.youtube.model.SearchResult;
+import com.procyk.industries.strings.YoutubeLinkBuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
-
+    private final String youtubeApi;
     @Inject
-    public CommandService(CommandExecutor commandExecutor) {
+    public CommandService(CommandExecutor commandExecutor, @Named("youtube") String youtubeApi) {
         this.commandExecutor=commandExecutor;
+        this.youtubeApi=youtubeApi;
     }
 
     /**
@@ -44,6 +49,7 @@ public class CommandService {
                 member.getEffectiveName(),
                 member.getGame()==null ? "Nothing" : member.getGame().getName(),
                 member.getRoles().toString()));
+
         switch(reservedCommand) {
             case add:
                 commandExecutor.addCommand(messageChannel,command);
@@ -83,8 +89,21 @@ public class CommandService {
             case notifyme:
                 commandExecutor.notifyme(messageChannel,member,command);
                 break;
+            case play:
+                command.setReservedCommand(ReservedCommand.player);
+                command.setKey("!"+ReservedCommand.PlayerCommands.play.name());
             case player:
                 commandExecutor.playerCommands(messageChannel, command);
+                break;
+            case search:
+                List<SearchResult> response = commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
+                if(response!=null)
+                    performUserRequest(
+                            event,
+                            new Message("!play ".concat(
+                                    YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(response.get(0).getId().getVideoId()))
+                            )
+                    );
                 break;
             case join:
                 commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);

@@ -133,4 +133,14 @@ class CommandParserTest {
         List<Command> cmds = CommandParser.parseCommands(text);
         assertEquals(cmds.get(0),cmd);
     }
+    @Test
+    void testParsePlay() {
+        String text = "!play youtube.com/watch?buyme_things";
+        Command cmd = CommandParser.parseCommand(text);
+        assertEquals(ReservedCommand.play, cmd.getReservedCommand());
+        assertEquals("youtube.com/watch?buyme_things", cmd.getValue());
+
+        List<Command> cmds = CommandParser.parseCommands(text);
+        assertEquals(cmds.get(0),cmd);
+    }
 }
