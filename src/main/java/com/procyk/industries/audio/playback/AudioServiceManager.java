@@ -64,7 +64,7 @@ public class AudioServiceManager {
      */
     public List<Path> getSongsInDirectory(String directory) throws IOException {
         directory = directory == null ? "" : directory;
-       return Files.walk(getLocalMusicRootPath().resolve(directory),1)
+       return Files.walk(getLocalMusicRootPath().resolve(directory),1, FileVisitOption.FOLLOW_LINKS)
                 .filter(path-> path.equals(getLocalMusicRootPath())==false)
                 .collect(Collectors.toList());
     }
