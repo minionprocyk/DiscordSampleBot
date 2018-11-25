@@ -143,4 +143,10 @@ class CommandParserTest {
         List<Command> cmds = CommandParser.parseCommands(text);
         assertEquals(cmds.get(0),cmd);
     }
+    @Test
+    void testSearch() {
+        String text = "!search something on youtube";
+        Command cmd = CommandParser.parseCommand(text);
+        System.out.println(cmd.toString());
+    }
 }

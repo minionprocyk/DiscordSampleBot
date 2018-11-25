@@ -19,6 +19,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -120,7 +121,16 @@ public class AudioServiceManager {
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
         audioLoadResultHandler.setTrackInfo(audioTrackUserData);
         audioLoadResultHandlerNew.setTrackInfo(audioTrackUserData);
-        audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew);
+
+        //syncronously wait for load to finish to fix playlist printing
+        //TODO would prefer to use future api like... loadItem.then(print playlist),
+        try {
+            audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public void joinRequestedChannel(VoiceChannel voiceChannel, AudioManager audioManager) {
@@ -137,8 +147,20 @@ public class AudioServiceManager {
     public void last() {
         trackScheduler.startPreviousTrack();
     }
+
+    /**
+     * Returns the playlist constructed from the {@link TrackScheduler}
+     * @return
+     */
     public String getPlayList() {
-        return trackScheduler.toString();
+        try {
+            return trackScheduler.playlist().get();
+        } catch (InterruptedException e) {
+           logger.warn("Interrupted by process");
+        } catch (ExecutionException e) {
+            logger.error("Error executing playlist, not good", e);
+        }
+        return "";
     }
     public List<Path> getKnownMusic() {
         return localMusicFiles;

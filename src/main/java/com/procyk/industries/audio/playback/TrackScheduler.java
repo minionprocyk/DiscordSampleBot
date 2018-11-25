@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 /**
@@ -24,9 +27,12 @@ public class TrackScheduler extends AudioEventAdapter{
     private AudioTrack lastTrack;
     private final Deque<AudioTrack> queueTracks;
     private boolean repeat=false;
+    private final ExecutorService executorService;
+
     @Inject
-    public TrackScheduler(AudioPlayer player) {
+    public TrackScheduler(AudioPlayer player, ExecutorService executorService) {
         this.player = player;
+        this.executorService=executorService;
         queueTracks = new ArrayDeque<>();
     }
 
@@ -84,7 +90,7 @@ public class TrackScheduler extends AudioEventAdapter{
         if(userData!=null) {
             //set player volume to user data volume if value is greater than 0, otherwise use player volume
             int volume = userData.getVolume();
-            if(volume>0 && volume<100) {
+            if(volume>0 && volume<=100) {
                 player.setVolume(volume);
             }
             if(track.isSeekable()) {
@@ -159,13 +165,31 @@ public class TrackScheduler extends AudioEventAdapter{
      */
     @Override
     public String toString() {
-        return queueTracks.stream()
+      List<String> tracks = queueTracks.stream()
                 .map(track -> String.format("%s:%s",track.getInfo().author,track.getInfo().title))
-                .collect(Collectors.toList())
-                .toString()
-                .concat(String.format(" - Currently Playing Track: %s by %s",
+              .collect(Collectors.toList());
+      Collections.reverse(tracks);
+
+    return tracks
+            .toString()
+            .concat(String.format(" - Currently Playing Track: %s by %s",
                         player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title,
                         player.getPlayingTrack()==null ? lastTrack.getInfo().author : player.getPlayingTrack().getInfo().author
                 ));
+    }
+    public Future<String> playlist() {
+        return executorService.submit(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                while(player.getPlayingTrack()==null) {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return TrackScheduler.this.toString();
+            }
+        });
     }
 }

@@ -16,6 +16,8 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AudioServiceModule extends AbstractModule{
     @Provides @Singleton AudioPlayerManager providesAudioPlayerManager() {
@@ -32,6 +34,11 @@ public class AudioServiceModule extends AbstractModule{
             Files.createDirectory(path.resolve("LocalMusic"));
         } catch (IOException e) {        }
         return path.resolve("LocalMusic");
+    }
+
+    @Provides @Singleton
+    ExecutorService providesExecutorService() {
+        return Executors.newSingleThreadExecutor();
     }
     @Override
     protected void configure() {

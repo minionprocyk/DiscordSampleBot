@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -27,7 +28,7 @@ class TrackSchedulerTest {
         AudioPlayer audioPlayer = mock(AudioPlayer.class);
         when(audioPlayer.getPlayingTrack()).thenReturn(mock(AudioTrack.class));
         when(audioPlayer.getPlayingTrack().getInfo()).thenReturn(mock(AudioTrackInfo.class));
-        scheduler = new TrackScheduler(audioPlayer);
+        scheduler = new TrackScheduler(audioPlayer, Executors.newSingleThreadExecutor());
         track = mock(AudioTrack.class,"first");
         tracks = new AudioTrack[]{
                 (mock(AudioTrack.class,"first")),
