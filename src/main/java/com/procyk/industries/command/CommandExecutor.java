@@ -241,6 +241,10 @@ public class CommandExecutor {
                         currVolume-=val;
 
                 }
+                //bound volume to level constraints 0-100
+                currVolume = Math.max(0,currVolume);
+                currVolume = Math.min(100,currVolume);
+
                 audioServiceManager.setVolume(currVolume);
                 MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
                 break;

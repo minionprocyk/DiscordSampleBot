@@ -6,10 +6,12 @@ import com.google.inject.Scopes;
 import com.google.inject.name.Named;
 import com.procyk.industries.audio.playback.AudioLoadResultHandlerImpl;
 import com.procyk.industries.audio.playback.AudioSendHandlerImpl;
+import com.procyk.industries.audio.record.AudioReceiveHandlerImpl;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import net.dv8tion.jda.core.audio.AudioReceiveHandler;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 
 import javax.inject.Singleton;
@@ -44,6 +46,7 @@ public class AudioServiceModule extends AbstractModule{
     protected void configure() {
         super.configure();
         bind(AudioLoadResultHandler.class).to(AudioLoadResultHandlerImpl.class).in(Scopes.NO_SCOPE);
+        bind(AudioReceiveHandler.class).to(AudioReceiveHandlerImpl.class).in(Scopes.SINGLETON);
         bind(AudioSendHandler.class).to(AudioSendHandlerImpl.class);
     }
 }

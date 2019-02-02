@@ -144,10 +144,6 @@ public class AudioServiceManager {
         audioManager.setReceivingHandler(audioReceiveHandler);
     }
     public void setVolume(int volume) {
-        if(volume>100)
-            volume=100;
-        if(volume<0)
-            volume=0;
         audioPlayer.setVolume(volume);
     }
     public void last() {
