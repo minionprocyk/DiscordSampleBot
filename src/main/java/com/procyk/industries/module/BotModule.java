@@ -60,7 +60,7 @@ public class BotModule extends AbstractModule{
     @Provides @Singleton
     JDA providesJDA(JDABuilder jdaBuilder) {
         try {
-            return jdaBuilder.buildAsync();
+            return jdaBuilder.build();
         } catch (LoginException e) {
             e.printStackTrace();
         }

@@ -169,9 +169,9 @@ public class TrackScheduler extends AudioEventAdapter{
                 .map(track -> String.format("%s:%s",track.getInfo().author,track.getInfo().title))
               .collect(Collectors.toList());
       Collections.reverse(tracks);
+      String strTracks = tracks.isEmpty() ? "" : tracks.toString();
 
-    return tracks
-            .toString()
+    return strTracks
             .concat(String.format(" - Currently Playing Track: %s by %s",
                         player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title,
                         player.getPlayingTrack()==null ? lastTrack.getInfo().author : player.getPlayingTrack().getInfo().author
