@@ -11,6 +11,9 @@ repositories {
 dependencies {
     compile group: 'com.google.firebase', name: 'firebase-admin', version: '6.5.0'
     compile 'com.google.apis:google-api-services-youtube:v3-rev205-1.25.0'
+    compile group: 'edu.cmu.sphinx', name: 'sphinx4-core', version:'5prealpha-SNAPSHOT'
+    compile group: 'edu.cmu.sphinx', name: 'sphinx4-data', version:'5prealpha-SNAPSHOT'
+
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     implementation 'net.dv8tion:JDA:3.8.2_459'
     implementation group: 'com.google.inject', name: 'guice', version: '4.2.0'

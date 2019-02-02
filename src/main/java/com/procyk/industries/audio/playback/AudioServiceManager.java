@@ -6,6 +6,7 @@ import com.procyk.industries.command.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import net.dv8tion.jda.core.audio.AudioReceiveHandler;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
 import org.apache.commons.lang3.StringUtils;
@@ -28,17 +29,21 @@ public class AudioServiceManager {
     private final AudioPlayer audioPlayer;
     private final TrackScheduler trackScheduler;
     private final AudioSendHandlerImpl audioSendHandler;
+    private final AudioReceiveHandler audioReceiveHandler;
     private final AudioLoadResultHandlerImpl audioLoadResultHandler;
     private final AudioPlayerManager audioPlayerManager;
     private final Path localMusicRootPath;
     private  List<Path> localMusicFiles;
     @Inject
-    public AudioServiceManager(AudioPlayerManager audioPlayerManager, AudioPlayer audioPlayer, TrackScheduler trackScheduler, AudioSendHandlerImpl audioSendHandler,
+    public AudioServiceManager(AudioPlayerManager audioPlayerManager, AudioPlayer audioPlayer,
+                               TrackScheduler trackScheduler, AudioSendHandlerImpl audioSendHandler,
+                               AudioReceiveHandler audioReceiveHandler,
                                AudioLoadResultHandlerImpl audioLoadResultHandler, @Named("LOCAL_MUSIC")Path localMusicRootPath) {
         this.audioPlayerManager=audioPlayerManager;
         this.audioPlayer=audioPlayer;
         this.trackScheduler=trackScheduler;
         this.audioSendHandler=audioSendHandler;
+        this.audioReceiveHandler=audioReceiveHandler;
         this.audioLoadResultHandler=audioLoadResultHandler;
         this.localMusicRootPath=localMusicRootPath;
         try {
@@ -46,7 +51,7 @@ public class AudioServiceManager {
             localMusicFiles = Files.walk(localMusicRootPath, FileVisitOption.FOLLOW_LINKS)
                     .collect(Collectors.toList()) ;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Cannot load local music files");
         }
         audioPlayer.addListener(trackScheduler);
         audioPlayer.setVolume(30);
@@ -136,6 +141,7 @@ public class AudioServiceManager {
     public void joinRequestedChannel(VoiceChannel voiceChannel, AudioManager audioManager) {
         audioManager.openAudioConnection(voiceChannel);
         audioManager.setSendingHandler(audioSendHandler);
+        audioManager.setReceivingHandler(audioReceiveHandler);
     }
     public void setVolume(int volume) {
         if(volume>100)
