@@ -3,12 +3,11 @@ package com.procyk.industries.command;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.common.base.Joiner;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.strings.Strings;
+import com.procyk.industries.strings.YoutubeLinkBuilder;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -22,7 +21,6 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -34,20 +32,23 @@ public class CommandExecutor {
     private final AudioServiceManager audioServiceManager;
     private final Strings specialStringsUtil;
     private final YouTube youtube;
+    private final MessageHandler messageHandler;
+
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
-                           YouTube youTube) {
+                           YouTube youTube, MessageHandler messageHandler) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
         this.youtube=youTube;
+        this.messageHandler=messageHandler;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
             messageChannel.getJDA().shutdown();
         else
-            MessageHandler.sendMessage(messageChannel, member.getUser().getName()+" tried to fuck me up.... HAHA");
+            messageHandler.sendMessage(member.getUser().getName()+" tried to fuck me up.... HAHA");
     }
     void leaveVoiceChannel(Guild guild) {
         guild.getAudioManager().closeAudioConnection();
@@ -59,7 +60,7 @@ public class CommandExecutor {
             audioServiceManager.joinRequestedChannel(voiceChannel,audioManager);
         }
         else {
-            MessageHandler.sendMessage(messageChannel, "I do not have permission to join "+channel.getName());
+            messageHandler.sendMessage("I do not have permission to join "+channel.getName());
         }
     }
 
@@ -86,29 +87,29 @@ public class CommandExecutor {
                     );
                 } catch (IOException e) {
                     logger.warn("Could not list songs",e);
-                    MessageHandler.sendMessage(messageChannel,"The directory path did not match exactly");
+                    messageHandler.sendMessage("The directory path did not match exactly");
                 }
 
-                MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
+                messageHandler.sendMessage(stringBuilder.toString());
                 break;
             case commands:
                 List<ReservedCommand.PlayerCommands> playerCommands = Arrays.asList(ReservedCommand.PlayerCommands.values());
                 Collections.sort(playerCommands);
-                MessageHandler.sendMessage(messageChannel,playerCommands.toString());
+                messageHandler.sendMessage(playerCommands.toString());
                 break;
             case clear:
                 audioServiceManager.clearPlaylist();
-                MessageHandler.sendMessage(messageChannel,"Playlist has been cleared");
+               messageHandler.sendMessage("Playlist has been cleared");
                 break;
             case skip:
             case next:
                 audioServiceManager.next();
-                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
+                messageHandler.sendMessage( audioServiceManager.getPlayList());
                 break;
             case pause:
                 audioServiceManager.pause();
 
-                MessageHandler.sendMessage(messageChannel, "Audio Player: ".concat(
+               messageHandler.sendMessage( "Audio Player: ".concat(
                         player.isPaused() ? "off" : "on"
                 ));
                 break;
@@ -120,10 +121,10 @@ public class CommandExecutor {
             case last:
             case previous:
                 audioServiceManager.last();
-                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
+                messageHandler.sendMessage( audioServiceManager.getPlayList());
                 break;
             case playlist:
-                MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
+                messageHandler.sendMessage( audioServiceManager.getPlayList());
                 break;
             case resume:
                 audioServiceManager.resume();
@@ -145,13 +146,13 @@ public class CommandExecutor {
             case play:
             case queue :
                 if(StringUtils.isBlank(command.getValue())) {
-                    MessageHandler.sendMessage(messageChannel, 
+                    messageHandler.sendMessage(
                             String.format("I can't read [!player %s]. Try [!player %<s <youtube_link>]",command.getKey())
                     );
                 }
                 else {
                     audioServiceManager.loadWithArgs(command);
-                    MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
+                    messageHandler.sendMessage( audioServiceManager.getPlayList());
                 }
                 break;
             case seek:
@@ -181,7 +182,7 @@ public class CommandExecutor {
                     default:
                         boolean currVal = trackScheduler.getRepeat();
                         trackScheduler.setRepeat(!currVal);
-                        MessageHandler.sendMessage(messageChannel,
+                        messageHandler.sendMessage(
                                 String.format("Repeat mode was %s but is now %s.",
                                         currVal ? "on" : "off",
                                         currVal ? "off" : "on"));
@@ -198,7 +199,7 @@ public class CommandExecutor {
 
                 if(StringUtils.isBlank(command.getValue())) {
 
-                    MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
+                    messageHandler.sendMessage( "Audio Player Volume: ".concat(currVolume.toString()));
                     return;
                 }
                 char firstChar = command.getValue().charAt(0);
@@ -215,8 +216,8 @@ public class CommandExecutor {
                     try {
                         currVolume = Integer.parseInt(command.getValue().trim());
                     } catch (NumberFormatException e) {
-                        MessageHandler.sendMessage(messageChannel, "I can't interpret: ".concat(command.getValue()));
-                        MessageHandler.sendMessage(messageChannel, "Try something like, [!player !volume +10]"
+                        messageHandler.sendMessage( "I can't interpret: ".concat(command.getValue()));
+                        messageHandler.sendMessage( "Try something like, [!player !volume +10]"
                         +", [!player !volume -10], or [!player !volume 10]");
 
                     }
@@ -231,8 +232,8 @@ public class CommandExecutor {
                     try {
                         val = Integer.parseInt(new String(volume));
                     } catch (NumberFormatException e) {
-                        MessageHandler.sendMessage(messageChannel, "I can't interpret: ".concat(command.getValue()));
-                        MessageHandler.sendMessage(messageChannel, "Try something like, [!player !volume +10]"
+                        messageHandler.sendMessage( "I can't interpret: ".concat(command.getValue()));
+                        messageHandler.sendMessage( "Try something like, [!player !volume +10]"
                                 +", [!player !volume -10], or [!player !volume 10]");                    }
 
                     if(addVolume)
@@ -246,10 +247,10 @@ public class CommandExecutor {
                 currVolume = Math.min(100,currVolume);
 
                 audioServiceManager.setVolume(currVolume);
-                MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
+                messageHandler.sendMessage( "Audio Player Volume: ".concat(currVolume.toString()));
                 break;
             default:
-                MessageHandler.sendMessage(messageChannel, 
+                messageHandler.sendMessage(
                         String.format("!player %s is wrong. Try !player !queue <youtube_link>",StringUtils.defaultIfBlank(command.getKey(),""))
                 );
         }
@@ -278,13 +279,13 @@ public class CommandExecutor {
             logger.info("Command added "+command.getKey());
             commandStore.saveCommand(command);
             logger.info("Command saved to file "+command.getKey());
-            MessageHandler.sendMessage(messageChannel, "Added ".concat(command.getKey()));
+            messageHandler.sendMessage( "Added ".concat(command.getKey()));
         }
     }
     void printCommands(MessageChannel messageChannel) {
         List<String> commandList = new ArrayList<>(commands.keySet());
         Collections.sort(commandList);
-        MessageHandler.sendMessage(messageChannel, commandList.toString());
+        messageHandler.sendMessage( commandList.toString());
     }
     /**
      * Expects a {@code Command} formatted as !edit !usercommand !changes. This method will lookup the existence of
@@ -302,11 +303,11 @@ public class CommandExecutor {
                 addCommand(messageChannel,command);
             }
             else {
-                MessageHandler.sendMessage(messageChannel, "Command "+command.getKey()+" does not exist");
+                messageHandler.sendMessage( "Command "+command.getKey()+" does not exist");
             }
         }
         else {
-            MessageHandler.sendMessage(messageChannel, 
+            messageHandler.sendMessage(
                     member.getUser().getName()+" doesn't have permission to do that :stuck_out_tongue_winking_eye: "
             );
         }
@@ -327,10 +328,10 @@ public class CommandExecutor {
         && (cmd = commands.get(command.getKey()))!=null) {
             deleteCommand(messageChannel, member, command);
             addCommand(messageChannel, new Command(command.getValue(), cmd));
-            MessageHandler.sendMessage(messageChannel, "Renamed "+command.getKey()+" to "+command.getValue());
+            messageHandler.sendMessage( "Renamed "+command.getKey()+" to "+command.getValue());
         }
         else {
-            MessageHandler.sendMessage(messageChannel, "Could not rename command. It should follow this format: "
+            messageHandler.sendMessage( "Could not rename command. It should follow this format: "
             + "[!rename !original !new].");
         }
     }
@@ -344,7 +345,7 @@ public class CommandExecutor {
         Random random = new Random();
         String[] keys = commands.keySet().toArray(new String[0]);
         String randomKey = keys[random.nextInt(keys.length)];
-        MessageHandler.sendMessage(messageChannel, "Preparing command: ".concat(randomKey));
+        messageHandler.sendMessage( "Preparing command: ".concat(randomKey));
         return randomKey;
     }
     void deleteCommand(MessageChannel messageChannel, Member member, Command command) {
@@ -352,21 +353,19 @@ public class CommandExecutor {
                 || member.hasPermission(Permission.BAN_MEMBERS)) {
             commandStore.deleteCommand(command);
             commands.remove(command.getKey());
-            MessageHandler.sendMessage(messageChannel, command.getKey()+" has been deleted");
+            messageHandler.sendMessage( command.getKey()+" has been deleted");
         }
         else {
-            MessageHandler.sendMessage(messageChannel, member.getUser().getName()+" doesn't have permission to do that :stuck_out_tongue_winking_eye: ");
+            messageHandler.sendMessage( member.getUser().getName()+" doesn't have permission to do that :stuck_out_tongue_winking_eye: ");
         }
 
     }
 
     /**
      * Searches youtube using the provided text and plays from the resulting list.
-     * @param messageChannel
-     * @param member
      * @param command
      */
-    List<SearchResult> searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
+    void searchCommand(Command command, String apiKey) {
         String query = command.getValue();
 
         try {
@@ -378,11 +377,24 @@ public class CommandExecutor {
             search.setMaxResults(5L);
 
             SearchListResponse searchListResponse = search.execute();
-            return searchListResponse.getItems();
+
+            //execute player command if we have search results
+            if(searchListResponse!=null) {
+                Command playerCommand = new Command(
+                        ReservedCommand.play,
+                        "!play",
+                        YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(
+                                searchListResponse.getItems().get(0).getId().getVideoId())
+                );
+                playerCommands(null, playerCommand);
+            }
+            else {
+                messageHandler.sendMessage("Could not find any search results with that");
+            }
+
         } catch (IOException e) {
             logger.warn("Failed to query search term: "+query, e);
         }
-        return null;
     }
     /**
      * Check if user command contains a key and value. A key only reference will search a map of commands for an
@@ -414,7 +426,7 @@ public class CommandExecutor {
             reflexiveAction.perform(command);
         }
         else
-            MessageHandler.sendMessage(messageChannel, command.getValue());
+            messageHandler.sendMessage( command.getValue());
     }
 
     /**
@@ -440,8 +452,7 @@ public class CommandExecutor {
      * @param command Command
      */
     void groupCommands(MessageChannel messageChannel, Member member, Command command) {
-        MessageHandler.sendMessage(
-                messageChannel,
+        messageHandler.sendMessage(
                 String.format("Hello %s I don't know how to group using [%s] just yet.",
                 member!=null ? member.getUser().getName() : "person",
                 command.getValue())
@@ -456,8 +467,7 @@ public class CommandExecutor {
      */
     void notifyme(MessageChannel messageChannel, Member member, Command command) {
         //!notifyme berge gamefinished !player !play <link> !whyme
-        MessageHandler.sendMessage(
-                messageChannel,
+        messageHandler.sendMessage(
                 String.format("Hello %s I don't know how to notify using [%s] just yet.",
                         member!=null ? member.getUser().getName() : "person",
                         command.getValue())

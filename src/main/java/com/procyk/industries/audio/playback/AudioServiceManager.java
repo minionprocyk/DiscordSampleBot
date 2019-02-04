@@ -152,7 +152,7 @@ public class AudioServiceManager {
 
     /**
      * Returns the playlist constructed from the {@link TrackScheduler}
-     * @return
+     * @return A string representation of all songs in the queue
      */
     public String getPlayList() {
         try {

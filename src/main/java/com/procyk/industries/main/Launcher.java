@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 class Launcher extends ListenerAdapter{
     private static final Logger logger = Logger.getLogger(Launcher.class.getName());
 
-    public static void main(String[] args) throws LoginException{
+    public static void main(String[] args) {
         Injector inject = Guice.createInjector(new CommandServiceModule(),new BotModule(), new AudioServiceModule());
         inject.getInstance(JDA.class);
         logger.info("All Modules injected. JDA is starting...");

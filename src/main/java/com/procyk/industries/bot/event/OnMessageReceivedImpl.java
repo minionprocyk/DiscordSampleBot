@@ -16,6 +16,8 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
     public OnMessageReceivedImpl(CommandService commandService) {
         this.commandService=commandService;
     }
+
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         super.onMessageReceived(event);

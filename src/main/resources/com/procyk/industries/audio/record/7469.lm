@@ -1,0 +1,67 @@
+Language model created by QuickLM on Sat Feb  2 19:38:44 EST 2019
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 7 sentences and 12 words
+
+\data\
+ngram 1=12
+ngram 2=18
+ngram 3=14
+
+\1-grams:
+-0.9031 </s> -0.3010
+-0.9031 <s> -0.2249
+-1.7482 DECREASE -0.2688
+-1.7482 DOWN -0.2430
+-1.7482 GAYNIGGERS -0.2430
+-1.7482 INCREASE -0.2688
+-1.4472 PLAY -0.2852
+-1.7482 PLAYING -0.2430
+-1.7482 RANDOM -0.2430
+-1.7482 UP -0.2430
+-1.1461 VOLUME -0.2249
+-1.7482 WHATS -0.2932
+
+\2-grams:
+-1.1461 <s> DECREASE 0.0000
+-1.1461 <s> INCREASE 0.0000
+-0.8451 <s> PLAY 0.0000
+-0.8451 <s> VOLUME -0.1761
+-1.1461 <s> WHATS 0.0000
+-0.3010 DECREASE VOLUME -0.1761
+-0.3010 DOWN </s> -0.3010
+-0.3010 GAYNIGGERS </s> -0.3010
+-0.3010 INCREASE VOLUME -0.1761
+-0.6021 PLAY GAYNIGGERS 0.0000
+-0.6021 PLAY RANDOM 0.0000
+-0.3010 PLAYING </s> -0.3010
+-0.3010 RANDOM </s> -0.3010
+-0.3010 UP </s> -0.3010
+-0.6021 VOLUME </s> -0.3010
+-0.9031 VOLUME DOWN 0.0000
+-0.9031 VOLUME UP 0.0000
+-0.3010 WHATS PLAYING 0.0000
+
+\3-grams:
+-0.3010 <s> DECREASE VOLUME
+-0.3010 <s> INCREASE VOLUME
+-0.6021 <s> PLAY GAYNIGGERS
+-0.6021 <s> PLAY RANDOM
+-0.6021 <s> VOLUME DOWN
+-0.6021 <s> VOLUME UP
+-0.3010 <s> WHATS PLAYING
+-0.3010 DECREASE VOLUME </s>
+-0.3010 INCREASE VOLUME </s>
+-0.3010 PLAY GAYNIGGERS </s>
+-0.3010 PLAY RANDOM </s>
+-0.3010 VOLUME DOWN </s>
+-0.3010 VOLUME UP </s>
+-0.3010 WHATS PLAYING </s>
+
+\end\
