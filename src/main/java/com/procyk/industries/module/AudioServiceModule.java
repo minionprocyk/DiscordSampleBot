@@ -30,12 +30,12 @@ public class AudioServiceModule extends AbstractModule{
     }
     @Provides @Singleton
     @Named("LOCAL_MUSIC")
-    Path providesAudioRootLocalMusicFolder (@Named("APP_PATH") Path path) {
-        //noinspection CatchMayIgnoreException
-        try {
-            Files.createDirectory(path.resolve("LocalMusic"));
-        } catch (IOException e) {        }
-        return path.resolve("LocalMusic");
+    Path providesAudioRootLocalMusicFolder (@Named("APP_PATH") Path path)throws IOException {
+        Path localMusicPath = path.resolve("LocalMusic");
+        if(!localMusicPath.toFile().exists()) {
+            Files.createDirectory(localMusicPath);
+        }
+        return localMusicPath;
     }
 
     @Provides @Singleton

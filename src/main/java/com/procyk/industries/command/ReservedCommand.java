@@ -18,7 +18,7 @@ public enum ReservedCommand {
      * @return True if this is an internally reserved command; False otherwise
      */
     public  boolean isNonUserCommand() {
-        return this.equals(none)==false && this.equals(user)==false;
+        return !this.equals(none) && !this.equals(user);
     }
 
     /**

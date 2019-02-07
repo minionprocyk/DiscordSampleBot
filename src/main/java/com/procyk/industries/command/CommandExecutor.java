@@ -2,7 +2,6 @@ package com.procyk.industries.command;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
@@ -33,7 +32,8 @@ public class CommandExecutor {
     private final Strings specialStringsUtil;
     private final YouTube youtube;
     private final MessageHandler messageHandler;
-
+    private static final Random random = new Random();
+    private boolean voiceShutdownConfirm=false;
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
                            YouTube youTube, MessageHandler messageHandler) {
@@ -44,6 +44,84 @@ public class CommandExecutor {
         this.youtube=youTube;
         this.messageHandler=messageHandler;
     }
+    private static final Map<String,String> directionToOperation = new HashMap<String,String>()
+    {{
+        put("UP","+");
+        put("INCREASE","+");
+        put("DOWN","-");
+        put("DECREASE","-");
+
+    }};
+    public void handleVoiceCommands(String strCommand, User user) {
+        Optional<TextChannel> optionalTextChannel= user.getJDA().getTextChannels().stream()
+                .filter(TextChannel::canTalk)
+                .filter(channel-> channel.getName().equalsIgnoreCase("General"))
+                .findFirst();
+
+        TextChannel textChannel;
+        Member member = user.getMutualGuilds().get(0).getMember(user);
+
+        if(optionalTextChannel.isPresent()) {
+            textChannel = optionalTextChannel.get();
+            strCommand = strCommand.toUpperCase();
+            Command command = new Command();
+
+            if (strCommand.contains("VOLUME")) {
+                //parse next string for the operand, then apply the proper command
+                String nextWord = strCommand.substring(strCommand.indexOf("VOLUME") + "VOLUME".length() + 1).split("\\s")[0];
+                String operand = directionToOperation.get(nextWord);
+                if (operand != null) {
+                    command.setKey("!volume");
+                    switch (operand) {
+                        case "+":
+                            command.setValue("+20");
+                            break;
+                        case "-":
+                            command.setValue("-20");
+                            break;
+                        default:
+                            logger.info("Operand not supported: {}", operand);
+                    }
+                    playerCommands(textChannel, command);
+
+                }
+            } else if (strCommand.startsWith("MUSIC TREE")) {
+//                messageHandler.sendMessage(String.format("[%s] - Did you say: %s?",
+//                        user.getName(),
+//                        strCommand.substring("MUSIC TREE ".length()))
+//                );
+                if (strCommand.endsWith("SHUTDOWN")) {
+                    if (!voiceShutdownConfirm) {
+                        voiceShutdownConfirm = true;
+                        messageHandler.sendMessage("Are you sure you want to shutdown?");
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                voiceShutdownConfirm=!voiceShutdownConfirm;
+                                messageHandler.sendMessage("Shutdown Terminated");
+                            }
+                        },5000L);
+                    } else {
+                        shutdown(textChannel, member);
+                    }
+                } else if (strCommand.endsWith("PLAY NEXT")) {
+                    command.setKey("!next");
+                    playerCommands(textChannel, command);
+                } else if (strCommand.endsWith("PAUSE") || strCommand.endsWith("PAWS")) {
+                    command.setKey("!pause");
+                    playerCommands(textChannel, command);
+                } else if (strCommand.endsWith("RESUME")) {
+                    command.setKey("!resume");
+                    playerCommands(textChannel, command);
+                } else if(strCommand.endsWith("RANDOM")) {
+                    command.setKey("!random");
+                    playerCommands(textChannel,command);
+                }
+
+            }
+        }
+    }
+
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
             messageChannel.getJDA().shutdown();
@@ -109,9 +187,7 @@ public class CommandExecutor {
             case pause:
                 audioServiceManager.pause();
 
-               messageHandler.sendMessage( "Audio Player: ".concat(
-                        player.isPaused() ? "off" : "on"
-                ));
+               messageHandler.sendMessage( "Audio Player: ".concat(player.isPaused() ? "off" : "on"));
                 break;
             case stop:
             case end:
@@ -160,7 +236,6 @@ public class CommandExecutor {
                 break;
             case random:
                 List<Path> music = audioServiceManager.getKnownMusic();
-                Random random = new Random();
                 int rIndex = random.nextInt(music.size());
                 String songPath = music.get(rIndex).toString();
                 command.setValue(songPath);
@@ -276,9 +351,9 @@ public class CommandExecutor {
                         (str)-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
                     command.setValue(songPath);
             }
-            logger.info("Command added "+command.getKey());
+            logger.info("Command added {}",command.getKey());
             commandStore.saveCommand(command);
-            logger.info("Command saved to file "+command.getKey());
+            logger.info("Command saved to file {}",command.getKey());
             messageHandler.sendMessage( "Added ".concat(command.getKey()));
         }
     }
@@ -324,7 +399,7 @@ public class CommandExecutor {
         String cmd=null;
         if(StringUtils.isNotEmpty(command.getKey())
         && StringUtils.isNotEmpty(command.getValue())
-        && StringUtils.containsWhitespace(command.getValue().trim()) == false
+        && !StringUtils.containsWhitespace(command.getValue().trim())
         && (cmd = commands.get(command.getKey()))!=null) {
             deleteCommand(messageChannel, member, command);
             addCommand(messageChannel, new Command(command.getValue(), cmd));
@@ -342,7 +417,6 @@ public class CommandExecutor {
      * @return A string representing a user requested available command
      */
     String randomCommand(MessageChannel messageChannel) {
-        Random random = new Random();
         String[] keys = commands.keySet().toArray(new String[0]);
         String randomKey = keys[random.nextInt(keys.length)];
         messageHandler.sendMessage( "Preparing command: ".concat(randomKey));
@@ -434,7 +508,7 @@ public class CommandExecutor {
      * @param strCommand User attempted command string
      * @return A list of possible outcomes that the user was trying to perform
      */
-    List<String> suggestCommands(String strCommand) {
+    private List<String> suggestCommands(String strCommand) {
         return commands.entrySet()
                 .stream()
                 .filter(entry ->

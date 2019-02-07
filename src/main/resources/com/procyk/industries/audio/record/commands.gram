@@ -1,0 +1,33 @@
+#JSGF V1.0;
+
+grammar dialog;
+
+<digit> = oh    |
+          zero  |
+          one   |
+          two   |
+          three |
+          four  |
+          five  |
+          six   |
+          seven |
+          eight |
+          nine  ;
+
+<direction> = up | down | increase | decrease;
+<number> = <digit>+;
+
+<bot_command> =  [show] commands |
+                  [go to [the]] bank account |
+                  weather forecast           |
+                  music tree shutdown        |
+                  exit [[the] program]       ;
+
+<player_command> = [music tree] [turn [the]] volume <direction> |
+                 [music tree] set volume [to] <number>
+                 music tree (paws | pause | resume | start | stop) |
+                 music tree play [something] (next | random) |
+                 [music tree] show [what [is]] [currently] playing
+                 ;
+
+public <command> = <bot_command> | <player_command>;

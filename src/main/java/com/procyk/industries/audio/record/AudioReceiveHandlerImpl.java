@@ -1,39 +1,35 @@
 package com.procyk.industries.audio.record;
 
 import com.google.inject.Provider;
-import com.procyk.industries.command.CommandService;
+import com.procyk.industries.command.CommandExecutor;
 import com.procyk.industries.concurrent.ThreadPoolManager;
-import edu.cmu.sphinx.api.Configuration;
-import edu.cmu.sphinx.api.LiveSpeechRecognizer;
-import edu.cmu.sphinx.api.SpeechResult;
-import edu.cmu.sphinx.api.StreamSpeechRecognizer;
-import edu.cmu.sphinx.result.WordResult;
 import net.dv8tion.jda.core.audio.AudioReceiveHandler;
 import net.dv8tion.jda.core.audio.CombinedAudio;
 import net.dv8tion.jda.core.audio.UserAudio;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import static com.procyk.industries.concurrent.ThreadPoolManager.getInstance;
 
 public class AudioReceiveHandlerImpl implements AudioReceiveHandler{
-    private static final Logger logger = Logger.getLogger(AudioReceiveHandlerImpl.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AudioReceiveHandlerImpl.class);
     private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     private long before = System.nanoTime();
     private long counter=0;
-    private Provider<CommandService> commandServiceProvider;
+    private Provider<CommandExecutor> commandExecutorProvider;
+
     @Inject
-    public AudioReceiveHandlerImpl(Provider<CommandService> commandServiceProvider) {
-        this.commandServiceProvider=commandServiceProvider;
+    public AudioReceiveHandlerImpl(Provider<CommandExecutor> commandServiceProvider) {
+        this.commandExecutorProvider =commandServiceProvider;
     }
 
     /**
@@ -54,137 +50,82 @@ public class AudioReceiveHandlerImpl implements AudioReceiveHandler{
         return true;
     }
 
-    public static void transcodeFromFile()throws Exception {
-        Configuration configuration = new Configuration();
-
-        // Load model from the jar
-        configuration
-                .setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
-
-        // You can also load model from folder
-        // configuration.setAcousticModelPath("file:en-us");
-
-        configuration
-                .setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
-        configuration
-                .setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
-
-        configuration.setSampleRate(48000);
-        StreamSpeechRecognizer recognizer = new StreamSpeechRecognizer(
-                configuration);
-        InputStream stream = AudioReceiveHandlerImpl.class
-                .getResourceAsStream("/com/procyk/industries/audio/record/testme.wav");
-        stream.skip(44);
-
-        // Simple recognition with generic model
-        recognizer.startRecognition(stream);
-        SpeechResult result;
-        while ((result = recognizer.getResult()) != null) {
-
-            System.out.format("Hypothesis: %s\n", result.getHypothesis());
-
-            System.out.println("List of recognized words and their times:");
-            for (WordResult r : result.getWords()) {
-                System.out.println(r);
-            }
-
-            System.out.println("Best 3 hypothesis:");
-            for (String s : result.getNbest(3))
-                System.out.println(s);
-
-        }
-        recognizer.stopRecognition();
-
-    }
-    public static void handleLiveAudio() {
-        //may have to async load audio and offload to continue streaming at a delay
-        try {
-            logger.info("Starting the live speech recognizer");
-           Configuration configuration = new Configuration();
-            String ACOUSTIC_MODEL_PATH = "resource:/edu/cmu/sphinx/models/en-us/en-us";
-            String DICTIONARY_PATH = "resource:/com/procyk/industries/audio/record/7469.dic";
-            String LANGUAGE_MODEL_PATH = "resource:/com/procyk/industries/audio/record/7469.lm";
-
-            configuration.setAcousticModelPath(ACOUSTIC_MODEL_PATH);
-            configuration.setDictionaryPath(DICTIONARY_PATH);
-            configuration.setLanguageModelPath(LANGUAGE_MODEL_PATH);
-
-            LiveSpeechRecognizer recognizer = new LiveSpeechRecognizer(configuration);
-            recognizer.startRecognition(true);
-            logger.info("Reading thoughts");
-            while(true) {
-                SpeechResult result = recognizer.getResult();
-                    logger.info("Hypothesis from speech recognizer: "+result.getHypothesis());
-
-                    logger.info("Result of individual words");
-                    logger.info(
-                            result.getWords().stream()
-                                    .map(WordResult::getWord)
-                                    .collect(Collectors.toList())
-                                    .toString());
-                    if(result.getHypothesis().equalsIgnoreCase("increase"))
-                        break;
-
-            }
-
-            recognizer.stopRecognition();
-
-        }catch(Exception e) {
-            System.out.println("Failed to recognize speech");
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void handleCombinedAudio(CombinedAudio combinedAudio) {
-
-
+        throw new UnsupportedOperationException("Combined audio speech recognition not supported");
     }
 
+    private void createAudioTasks(UserAudio userAudio) {
+        String fileName = "sphinx_"+counter++;
+        //todo replace with Provider<ThreadPoolmanager>.get
+        getInstance()
+                .submit(new CreateWaveFileTask(byteArrayOutputStream,fileName));
+        Future<String> futureHypothesis = ThreadPoolManager.getInstance()
+                .submit(new SpeechToTextTask(fileName));
+
+        CompletableFuture.supplyAsync(()-> {
+            try {
+                String val = futureHypothesis.get();
+                if(StringUtils.isNotBlank(val)) {
+                    logger.info("Performing action with hypothesis: {}",val);
+                    commandExecutorProvider.get()
+                            .handleVoiceCommands(val,userAudio.getUser());
+                }
+            } catch (InterruptedException| ExecutionException  e) {
+                logger.info("Failed to use Future Hypothesis: ",e);
+                Thread.currentThread().interrupt();
+            }
+            return "";
+        });
+        before=System.nanoTime();
+        byteArrayOutputStream = new ByteArrayOutputStream();
+        scheduled=false;
+    }
+
+    private Timer timer = new Timer();
+    private boolean scheduled=false;
+    private static final long RECOGNITION_DELAY = 300L;
+
+
+    /**
+     * As userAudio comes in, write all data to a {@link ByteArrayOutputStream}. Wait until there is a duration
+     * of silence, then dispatch all data to the appropriate audio tasks for processing.
+     * @param userAudio User Audio
+     */
     @Override
     public void handleUserAudio(UserAudio userAudio) {
         byte[] data = userAudio.getAudioData(1.0d);
         try {
             byteArrayOutputStream.write(data);
         }catch(Exception e) {
-            e.printStackTrace();
+            logger.warn("Failed to write some bytes to speech recognition stream",e);
         }
-        //todo more sophisticated approach on determining line cutoffs for processing
         long now = System.nanoTime();
-        long timediff = TimeUnit.NANOSECONDS.toSeconds(now-before);
-        if(timediff >= 3) {
-            String fileName = "sphinx_"+counter++;
-            getInstance()
-                    .submit(new CreateWaveFileTask(byteArrayOutputStream,fileName));
-            Future<String> futureHypothesis = ThreadPoolManager.getInstance()
-                    .submit(new SpeechToTextTask(fileName));
+        long timediff = TimeUnit.NANOSECONDS.toMillis(now-before);
 
-            CompletableFuture.supplyAsync(()-> {
-                try {
-                    String val = futureHypothesis.get();
-                    if(StringUtils.isNotBlank(val)) {
-                        logger.info("Performing action with hypothesis: "+val);
-                        commandServiceProvider.get()
-                                .performCustomJDAEvent(val,userAudio.getUser());
-                    }
-                } catch (InterruptedException| ExecutionException  e) {
-                    logger.info("Failed to use Future Hypothesis");
-                    e.printStackTrace();
-
-                }
-                return "";
-            });
-            before=now;
-            byteArrayOutputStream = new ByteArrayOutputStream();
+        if(timediff < RECOGNITION_DELAY) {
+            timer.cancel();
+            timer = new Timer();
+            scheduled=false;
         }
-
+        if(!scheduled) {
+            //todo replace with Provider<AudioTaskFactory>.get ? inject userAudio into constructor?
+            timer.schedule(new AudioTaskFactory(userAudio),RECOGNITION_DELAY);
+            scheduled=true;
+        }
+        before = System.nanoTime();
     }
-    public static void main(String[] args) throws  Exception{
-//        System.out.println(AudioReceiveHandler.OUTPUT_FORMAT.getFrameSize());
-//        AudioFormat targetFormat = new AudioFormat(16000, 16, 1, true, false);
-//
-//        System.out.println(targetFormat.getFrameSize());
-        AudioReceiveHandlerImpl.handleLiveAudio();
-//        transcodeFromFile();
+
+    private class AudioTaskFactory extends TimerTask {
+        private final Logger logger = LoggerFactory.getLogger(AudioTaskFactory.class);
+        private final UserAudio userAudio;
+        AudioTaskFactory(UserAudio userAudio) {
+            this.userAudio=userAudio;
+        }
+        @Override
+        public void run() {
+            logger.info("Starting Audio Tasks");
+            createAudioTasks(userAudio);
+        }
     }
 }

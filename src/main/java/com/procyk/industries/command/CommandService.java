@@ -1,6 +1,5 @@
 package com.procyk.industries.command;
 
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
@@ -9,56 +8,18 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Singleton
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
     private final String youtubeApi;
-    private final JDA jda;
-
     @Inject
-    public CommandService(CommandExecutor commandExecutor, @Named("youtube") String youtubeApi, JDA jda) {
+    public CommandService(CommandExecutor commandExecutor, @Named("youtube") String youtubeApi) {
         this.commandExecutor=commandExecutor;
         this.youtubeApi=youtubeApi;
-        this.jda=jda;
     }
 
-
-    public void performCustomJDAEvent(String strCommand, User user) {
-        Optional<TextChannel> optionalTextChannel= jda.getTextChannels().stream()
-        .filter(TextChannel::canTalk)
-        .filter(channel-> channel.getName().equalsIgnoreCase("General"))
-        .findFirst();
-
-        TextChannel textChannel;
-        if(optionalTextChannel.isPresent()) {
-            textChannel = optionalTextChannel.get();
-            strCommand = strCommand.toUpperCase();
-            if(strCommand.contains("VOLUME") && strCommand.contains("UP")) {
-                Command command = new Command("!volume","+20");
-                commandExecutor.playerCommands(textChannel, command);
-            }
-            else if(strCommand.contains("VOLUME") && strCommand.contains("DOWN")) {
-                Command command = new Command("!volume","-20");
-                commandExecutor.playerCommands(textChannel,command);
-            }
-            else if(strCommand.startsWith("SEARCH FOR")) {
-                Command command = new Command("!search",strCommand.substring(strCommand.indexOf("SEARCH")));
-                commandExecutor.searchCommand(command,youtubeApi);
-            }
-            //todo cannot do shutdown without verifying the user via a Member object
-//            else if(strCommand.contains("COMMENCE") && strCommand.contains("SHUTDOWN")) {
-//                Command command = new Command("!shutdown","");
-//            }
-            else {
-                logger.info("Unsupported custom command: "+strCommand);
-            }
-
-        }
-
-    }
     /**
      * Takes a {@code Command} object and forwards it to the appropriate method provided by the {@code CommandExecutor}
      * @param reservedCommand A preset command built into the bot

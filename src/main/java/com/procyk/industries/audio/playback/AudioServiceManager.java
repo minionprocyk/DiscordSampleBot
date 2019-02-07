@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class AudioServiceManager {
@@ -46,10 +47,9 @@ public class AudioServiceManager {
         this.audioReceiveHandler=audioReceiveHandler;
         this.audioLoadResultHandler=audioLoadResultHandler;
         this.localMusicRootPath=localMusicRootPath;
-        try {
 
-            localMusicFiles = Files.walk(localMusicRootPath, FileVisitOption.FOLLOW_LINKS)
-                    .collect(Collectors.toList()) ;
+        try ( Stream<Path> fileStream = Files.walk(localMusicRootPath, FileVisitOption.FOLLOW_LINKS)){
+            localMusicFiles = fileStream.collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Cannot load local music files");
         }
@@ -70,9 +70,10 @@ public class AudioServiceManager {
      */
     public List<Path> getSongsInDirectory(String directory) throws IOException {
         directory = directory == null ? "" : directory;
-       return Files.walk(getLocalMusicRootPath().resolve(directory),1, FileVisitOption.FOLLOW_LINKS)
-                .filter(path-> path.equals(getLocalMusicRootPath())==false)
-                .collect(Collectors.toList());
+        try(Stream<Path> pathStream = Files.walk(getLocalMusicRootPath().resolve(directory),1, FileVisitOption.FOLLOW_LINKS)) {
+            return pathStream.filter(path-> !path.equals(getLocalMusicRootPath()))
+                    .collect(Collectors.toList());
+        }
     }
     public String trimRootPath(String songPath) {
         if(songPath.equals(getLocalMusicRootPath().toString()))
@@ -122,6 +123,7 @@ public class AudioServiceManager {
         if(StringUtils.isNotBlank(strVolume)) {
             volume = Integer.parseInt(strVolume);
         }
+        //todo replace with Provider<AudioTrackUserData> and Provider<AudioLoadResultHandlerImpl>
         AudioTrackUserData audioTrackUserData = new AudioTrackUserData(volume,start,end);
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
         audioLoadResultHandler.setTrackInfo(audioTrackUserData);
