@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
+import com.procyk.industries.module.Application;
 import com.procyk.industries.strings.Strings;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.dv8tion.jda.core.Permission;
@@ -34,14 +35,17 @@ public class CommandExecutor {
     private final AudioServiceManager audioServiceManager;
     private final Strings specialStringsUtil;
     private final YouTube youtube;
+    private final Random random;
+
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
-                           YouTube youTube) {
+                           Random random, YouTube youTube) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
         this.youtube=youTube;
+        this.random = random;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
@@ -151,7 +155,11 @@ public class CommandExecutor {
                 }
                 else {
                     audioServiceManager.loadWithArgs(command);
-                    MessageHandler.sendMessage(messageChannel, audioServiceManager.getPlayList());
+                    String playlist = audioServiceManager.getPlayList();
+                    if(playlist.equals(Application.TRACK_SCHEDULER_CANNOT_PLAY_TRACK))
+                        playlist = String.format("That command doesn't work and probably has a broken link: \"%s\".",
+                                command.getValue());
+                    MessageHandler.sendMessage(messageChannel, playlist);
                 }
                 break;
             case seek:
@@ -159,7 +167,6 @@ public class CommandExecutor {
                 break;
             case random:
                 List<Path> music = audioServiceManager.getKnownMusic();
-                Random random = new Random();
                 int rIndex = random.nextInt(music.size());
                 String songPath = music.get(rIndex).toString();
                 command.setValue(songPath);

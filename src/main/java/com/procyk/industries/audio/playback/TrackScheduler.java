@@ -1,5 +1,6 @@
 package com.procyk.industries.audio.playback;
 
+import com.procyk.industries.module.Application;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -13,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,7 @@ public class TrackScheduler extends AudioEventAdapter{
     private final Deque<AudioTrack> queueTracks;
     private boolean repeat=false;
     private final ExecutorService executorService;
+    private final long timeout=5000;
 
     @Inject
     public TrackScheduler(AudioPlayer player, ExecutorService executorService) {
@@ -165,31 +168,33 @@ public class TrackScheduler extends AudioEventAdapter{
      */
     @Override
     public String toString() {
-      List<String> tracks = queueTracks.stream()
+        List<String> tracks = queueTracks.stream()
                 .map(track -> String.format("%s:%s",track.getInfo().author,track.getInfo().title))
-              .collect(Collectors.toList());
-      Collections.reverse(tracks);
-      String strTracks = tracks.isEmpty() ? "" : tracks.toString();
+                .collect(Collectors.toList());
+        Collections.reverse(tracks);
+        String strTracks = tracks.isEmpty() ? "" : tracks.toString().concat(" - ");
 
-    return strTracks
-            .concat(String.format(" - Currently Playing Track: %s by %s",
+        return strTracks
+                .concat(String.format("Currently Playing Track: %s by %s",
                         player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title,
                         player.getPlayingTrack()==null ? lastTrack.getInfo().author : player.getPlayingTrack().getInfo().author
                 ));
     }
     public Future<String> playlist() {
-        return executorService.submit(new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                while(player.getPlayingTrack()==null) {
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        return executorService.submit(()-> {
+            long start=System.currentTimeMillis();
+            while(player.getPlayingTrack()==null) {
+                long waited = System.currentTimeMillis() - start;
+                try {
+                    if(waited >= timeout)
+                        Thread.currentThread().interrupt();
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return Application.TRACK_SCHEDULER_CANNOT_PLAY_TRACK;
                 }
-                return TrackScheduler.this.toString();
             }
+            return TrackScheduler.this.toString();
         });
     }
 }

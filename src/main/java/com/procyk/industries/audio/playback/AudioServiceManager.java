@@ -104,7 +104,6 @@ public class AudioServiceManager {
         audioPlayerManager.loadItem(track,audioLoadResultHandler);
     }
     public void loadWithArgs(Command command) {
-        //get the stuff
         String strStart = command.getOptionalArg("start");
         String strEnd = command.getOptionalArg("end");
         String strVolume = command.getOptionalArg("volume");
@@ -156,7 +155,8 @@ public class AudioServiceManager {
         try {
             return trackScheduler.playlist().get();
         } catch (InterruptedException e) {
-           logger.warn("Interrupted by process");
+            logger.warn("Interrupted by process");
+            Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             logger.error("Error executing playlist, not good", e);
         }
