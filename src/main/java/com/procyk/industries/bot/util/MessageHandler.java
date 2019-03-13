@@ -3,9 +3,12 @@ package com.procyk.industries.bot.util;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
 
-public class MessageHandler {
-    static final int MESSAGE_SIZE=1990;
+public final class MessageHandler {
+    private static final int MESSAGE_SIZE=1990;
 
+    private MessageHandler() {
+        throw new IllegalStateException("Static Utility Class");
+    }
     /**
      * Generic handler for sending messages through the bot. Accounts for maximum string lengths and queues up chunks
      * of messages when the message is too big.

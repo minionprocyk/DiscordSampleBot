@@ -22,10 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class BotModule extends AbstractModule{
+public class BotTestModule extends AbstractModule {
     private final Logger logger = LoggerFactory.getLogger(BotModule.class);
 
-    @Provides @Named("token") String providesToken() {
+    @Provides
+    @Named("token") String providesToken() {
         InputStream in = getClass().getResourceAsStream("/token");
         Properties properties = new Properties();
         String result="";
@@ -45,7 +46,7 @@ public class BotModule extends AbstractModule{
     }
     @Provides ListenerAdapter[] providesListenerAdapters(OnMessageReceivedImpl onMessageReceived, OnBotShutdownImpl onBotShutdown) {
         return new ListenerAdapter[]{
-            onMessageReceived,
+                onMessageReceived,
                 onBotShutdown
         };
     }
@@ -68,5 +69,10 @@ public class BotModule extends AbstractModule{
             logger.error("JDA Failed to launch {}",e);
         }
         return null;
+    }
+
+    @Override
+    protected void configure() {
+        bind(CRUDable.class).to(FirestoreCRUD.class).in(Scopes.SINGLETON);
     }
 }

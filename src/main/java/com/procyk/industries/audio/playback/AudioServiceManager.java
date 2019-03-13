@@ -42,11 +42,10 @@ public class AudioServiceManager {
         this.audioLoadResultHandler=audioLoadResultHandler;
         this.localMusicRootPath=localMusicRootPath;
         try {
-
             localMusicFiles = Files.walk(localMusicRootPath, FileVisitOption.FOLLOW_LINKS)
                     .collect(Collectors.toList()) ;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("Local Music Files not found.");
         }
         audioPlayer.addListener(trackScheduler);
         audioPlayer.setVolume(30);
@@ -125,10 +124,9 @@ public class AudioServiceManager {
         //TODO would prefer to use future api like... loadItem.then(print playlist),
         try {
             audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.info("Thread interrupted while loading track {}", e);
+            Thread.currentThread().interrupt();
         }
     }
 

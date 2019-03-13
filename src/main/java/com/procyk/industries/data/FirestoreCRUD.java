@@ -3,22 +3,23 @@ package com.procyk.industries.data;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
-import com.procyk.industries.command.Command;
-
 import com.google.inject.Inject;
+import com.procyk.industries.command.Command;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class FirestoreCRUD implements CRUDable {
-    private final Logger logger = Logger.getLogger(FirestoreCRUD.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(FirestoreCRUD.class);
     private final Firestore db;
+    private static final String COMMANDS_COLLECTION = "commands";
 
     @Inject
     public FirestoreCRUD(Firestore firestore) {
@@ -27,7 +28,7 @@ public class FirestoreCRUD implements CRUDable {
     @Override
     public Set<Command> getCommands() {
         try {
-            return db.collection("commands").get().get().getDocuments().stream()
+            return db.collection(COMMANDS_COLLECTION).get().get().getDocuments().stream()
                     .map(queryDocumentSnapshot ->
                             new Command(
                                     queryDocumentSnapshot.getString("name"),
@@ -35,46 +36,48 @@ public class FirestoreCRUD implements CRUDable {
                     )
                     .collect(Collectors.toSet());
         } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.SEVERE, "Failed to get commands", e);
+            logger.error("Failed to get commands", e);
+            Thread.currentThread().interrupt();
         }
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public void addCommand(Command command) {
         if(null!=command && StringUtils.isNotBlank(command.getKey()) && StringUtils.isNotBlank(command.getValue()))
         {
-            Map<String,String> fields = new HashMap<String,String>() {{
-                put("name",command.getKey());
-                put("value",command.getValue());
-            }};
-            ApiFuture<WriteResult> future = db.collection("commands").document(command.getKey()).create(fields);
+            Map<String,String> fields = new HashMap<>();
+            fields.put("name",command.getKey());
+            fields.put("value",command.getValue());
+
+            ApiFuture<WriteResult> future = db.collection(COMMANDS_COLLECTION).document(command.getKey()).create(fields);
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.WARNING,"Command: "+command.toString()+" may already exist",e);
+                logger.error("Command: {} may already exist {}", command,e);
+                Thread.currentThread().interrupt();
             }
         }
         else {
-            logger.info("Not adding command: "+(null!=command ? command.toString() : "EMPTY_COMMAND"));
+            String cmdString = (null!=command ? command.toString() : "EMPTY_COMMAND");
+            logger.info("Not adding command: {}",cmdString);
         }
     }
 
     @Override
     public void removeCommand(Command command) {
-        logger.info("Removing "+command.toString());
+        logger.info("Removing {}", command);
         try {
-            db.collection("commands").document(command.getKey()).delete().get();
+            db.collection(COMMANDS_COLLECTION).document(command.getKey()).delete().get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.WARNING, "Failed to delete command "+command.toString());
+            logger.error("Failed to delete command {}", command);
+            Thread.currentThread().interrupt();
         }
     }
 
     @Override
     public void saveAllCommands(Map<String, String> commands) {
-        logger.info("Saving commands: " +commands.toString());
-        commands.forEach((k,v) -> {
-            addCommand(new Command(k,v));
-        });
+        logger.info("Saving commands: {}", commands);
+        commands.forEach((k,v) -> addCommand(new Command(k,v)));
     }
 }

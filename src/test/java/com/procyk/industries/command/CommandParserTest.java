@@ -61,7 +61,7 @@ class CommandParserTest {
 
         test = "!add !player !play <linK>";
         resultList = CommandParser.testRegexParse(test,CommandParser.resrvedCommandPattern);
-        expectedList = Arrays.asList("add","player");
+        expectedList = Arrays.asList("add","player", "play");
         assertEquals(expectedList,resultList);
 
         test = "!daisy -> !chain -> !this -> !command";

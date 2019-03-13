@@ -4,23 +4,25 @@ import com.procyk.industries.module.Application;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.*;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.TrackMarker;
+import com.sedmelluq.discord.lavaplayer.track.TrackMarkerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Maintains the tail of the list up to MAX_SIZE of non null elements. The list is backed by an array list
- * which is only added to and never removed. Rather a sublist is created after each queue containing the
- * MAX_SIZE of tracks.
+ * Maintains and orchestrates a list of tracks to be played.
  */
 @Singleton
 public class TrackScheduler extends AudioEventAdapter{
@@ -30,7 +32,7 @@ public class TrackScheduler extends AudioEventAdapter{
     private final Deque<AudioTrack> queueTracks;
     private boolean repeat=false;
     private final ExecutorService executorService;
-    private final long timeout=5000;
+    private static final long TIMEOUT=5000;
 
     @Inject
     public TrackScheduler(AudioPlayer player, ExecutorService executorService) {
@@ -45,12 +47,12 @@ public class TrackScheduler extends AudioEventAdapter{
         }
     }
     public void startPreviousTrack() {
-        AudioTrack track = getTrack(Direction.previous);
+        AudioTrack track = getTrack(Direction.PREVIOUS);
         if(track!=null)
             startTrack(track.makeClone(),false);
     }
     public void startNextTrack() {
-        AudioTrack track = getTrack(Direction.next);
+        AudioTrack track = getTrack(Direction.NEXT);
         startTrack(track,false);
     }
     public void clearPlaylist() {
@@ -77,14 +79,10 @@ public class TrackScheduler extends AudioEventAdapter{
         }
     }
     @Override
-    public void onPlayerPause(AudioPlayer player) {
-        // Player was paused;
-    }
+    public void onPlayerPause(AudioPlayer player) { }
 
     @Override
-    public void onPlayerResume(AudioPlayer player) {
-        // Player was resumed
-    }
+    public void onPlayerResume(AudioPlayer player) { }
 
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
@@ -99,12 +97,12 @@ public class TrackScheduler extends AudioEventAdapter{
             if(track.isSeekable()) {
                 //always initialize track start as 0 by default, else use userData
                 track.setPosition(userData.getStart());
-                //set track event handler to start next track if end time is triggered
+                //set track event handler to start NEXT track if end time is triggered
                 long end = userData.getEnd();
                 if(end>0) {
                     track.setMarker(
                             new TrackMarker(end,(markerState)->{
-                                logger.info("Track Marker Triggered: "+markerState);
+                                logger.info("Track Marker Triggered: {}",markerState);
                                 if(markerState==TrackMarkerHandler.MarkerState.REACHED) {
                                     player.stopTrack();
                                 }
@@ -117,7 +115,7 @@ public class TrackScheduler extends AudioEventAdapter{
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        logger.info("Track ended with reason: "+endReason);
+        logger.info("Track ended with reason: {}",endReason);
         if (endReason.mayStartNext || endReason==AudioTrackEndReason.STOPPED) {
             lastTrack=track;
             if(repeat) {
@@ -147,16 +145,16 @@ public class TrackScheduler extends AudioEventAdapter{
         startNextTrack();
     }
     enum Direction{
-        next,previous
+        NEXT, PREVIOUS
     }
 
     private AudioTrack getTrack(Direction direction) {
         AudioTrack result = null;
         switch(direction) {
-            case next:
+            case NEXT:
                 result = queueTracks.poll();
                 break;
-            case previous:
+            case PREVIOUS:
                 result =lastTrack;
                 break;
             default:
@@ -186,7 +184,7 @@ public class TrackScheduler extends AudioEventAdapter{
             while(player.getPlayingTrack()==null) {
                 long waited = System.currentTimeMillis() - start;
                 try {
-                    if(waited >= timeout)
+                    if(waited >= TIMEOUT)
                         Thread.currentThread().interrupt();
                     Thread.sleep(5);
                 } catch (InterruptedException e) {

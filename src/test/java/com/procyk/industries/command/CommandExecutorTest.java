@@ -4,14 +4,13 @@ import com.google.inject.Guice;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
+import com.procyk.industries.module.CommandServiceTestModule;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.requests.restaction.MessageAction;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -20,6 +19,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CommandExecutorTest {
     Map<String,String> commands;
     @Inject
@@ -29,13 +29,14 @@ class CommandExecutorTest {
     MessageAction messageAction;
     Member member;
     User user ;
-    @BeforeEach
+    @BeforeAll
     public void setUp() {
-        Guice.createInjector(new BotModule(), new CommandServiceModule(),new AudioServiceModule()).injectMembers(this);
+        Guice.createInjector(new BotModule(), new CommandServiceTestModule(),new AudioServiceModule()).injectMembers(this);
         commands = new HashMap<String, String>()
         {{
           put("!test","test action");
         }};
+
         messageChannel = mock(MessageChannel.class);
         messageAction = mock(MessageAction.class);
         doNothing().when(messageAction).queue();
@@ -46,7 +47,7 @@ class CommandExecutorTest {
         when(member.hasPermission(Permission.ADMINISTRATOR)).thenReturn(true);
         when(user.getName()).thenReturn("bob");
     }
-    @AfterEach
+    @AfterAll
     public void tearDown() {
         commandExecutor=null;
         commands=null;

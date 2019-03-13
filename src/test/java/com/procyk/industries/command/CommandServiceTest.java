@@ -1,28 +1,31 @@
 package com.procyk.industries.command;
 
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
+import com.procyk.industries.module.CommandServiceTestModule;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.requests.restaction.MessageAction;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
 
-import javax.inject.Inject;
+
+import java.util.HashMap;
+import java.util.HashSet;
 
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CommandServiceTest {
     @Inject
-    private
-    CommandService commandService;
+    private CommandService commandService;
+
     private MessageReceivedEvent messageReceivedEvent;
     private MessageChannel messageChannel;
     private MessageAction messageAction;
@@ -32,9 +35,9 @@ class CommandServiceTest {
     private User user;
     private Message message;
 
-    @BeforeEach
+    @BeforeAll
     void setUp() {
-        Guice.createInjector(new CommandServiceModule(),new BotModule(),new AudioServiceModule()).injectMembers(this);
+        Guice.createInjector(new CommandServiceTestModule(),new BotModule(),new AudioServiceModule()).injectMembers(this);
         messageReceivedEvent = mock(MessageReceivedEvent.class);
         messageChannel = mock(MessageChannel.class);
         messageAction = mock(MessageAction.class);
@@ -57,9 +60,10 @@ class CommandServiceTest {
         when(messageReceivedEvent.getTextChannel()).thenReturn(textChannel);
         when(messageReceivedEvent.getMember()).thenReturn(member);
         when(messageReceivedEvent.getMember().getUser()).thenReturn(user);
+
     }
 
-    @AfterEach
+    @AfterAll
     void tearDown() {
         commandService=null;
         message=null;

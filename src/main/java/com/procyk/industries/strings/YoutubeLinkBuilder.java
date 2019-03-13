@@ -1,14 +1,16 @@
 package com.procyk.industries.strings;
 
 import com.google.api.services.youtube.model.SearchResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
-public class YoutubeLinkBuilder {
-    private static final Logger logger = Logger.getLogger(YoutubeLinkBuilder.class.getName());
+public final class YoutubeLinkBuilder {
+    private static final Logger logger = LoggerFactory.getLogger(YoutubeLinkBuilder.class);
 
+    private YoutubeLinkBuilder() {}
     /**
      * Constructs a youtube video link from a youtube videoId
      * @param videoId
@@ -20,6 +22,7 @@ public class YoutubeLinkBuilder {
         List<String> videoIds = new ArrayList<>();
         if(searchResults!=null) {
             for(SearchResult searchResult : searchResults) {
+                logger.info("Making youtube link from search result {}", searchResult);
                 videoIds.add(
                         makeYoutubeLinkFromVideoId(searchResult.getId().getVideoId())
                 );

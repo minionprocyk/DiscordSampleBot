@@ -68,7 +68,9 @@ class TrackSchedulerTest {
         scheduler.startNextTrack();
         scheduler.startNextTrack();
         scheduler.startPreviousTrack();
-        Object[] names = trackList.stream().map(track1 -> String.format("%s:%s",track1.getInfo().author,track1.getInfo().title)).toArray();
+        Object[] names = trackList.stream()
+                .map(track1 -> String.format("%s:%s",track1.getInfo().author,track1.getInfo().title))
+                .toArray();
         assertEquals(String.format("[%s, %s, %s] - Currently Playing Track: null by null",Arrays.copyOfRange(names,2,names.length)),scheduler.toString());
     }
     @Test
@@ -86,7 +88,7 @@ class TrackSchedulerTest {
                 newNames[count++] = name;
             }
         }
-        //make sure previous doesnt go beyond scope after exceeding size
+
         for(int i=0;i<100;i++) {
             scheduler.startPreviousTrack();
         }

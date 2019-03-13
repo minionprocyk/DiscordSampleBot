@@ -28,8 +28,8 @@ public class Strings implements StringMatcher{
             for(int i=0;i<minLength;i++) {
                 char tc = textChars[i];
                 char mc = matchChars[i];
-                if(!charAlmostMatches(tc,mc)) {
-                    if (++errors > allowedErrors)
+                if(!charAlmostMatches(tc,mc)
+                && (++errors > allowedErrors)) {
                         return false;
                 }
             }
@@ -59,9 +59,9 @@ public class Strings implements StringMatcher{
             for(int i=0;i<minLength/2;i++) {
                 char tc = textChars[i];
                 char mc = matchChars[i];
-                if(!charAlmostMatches(tc,mc)) {
-                    if (++errors > allowedErrors)
-                        return false;
+                if(!charAlmostMatches(tc,mc)
+                && (++errors > allowedErrors)) {
+                    return false;
                 }
             }
             int textCharsIndex = textChars.length-1;
@@ -69,8 +69,8 @@ public class Strings implements StringMatcher{
             for(int i=0;i<minLength/2;i++,textCharsIndex--,matchCharsIndex--) {
                 char tc = textChars[textCharsIndex];
                 char mc = matchChars[matchCharsIndex];
-                if(!charAlmostMatches(tc,mc)) {
-                    if (++errors > allowedErrors)
+                if(!charAlmostMatches(tc,mc)
+                && (++errors > allowedErrors)) {
                         return false;
                 }
             }

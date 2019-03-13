@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -22,7 +21,6 @@ public class CommandParser {
     private static final String reservedPlayerCommandRegex;
     private static final String subCommandRegex;
     static {
-        //generate reserved command or regex
         StringBuilder builder = new StringBuilder(100);
         for (ReservedCommand reservedCommand : ReservedCommand.values()) {
             builder.append("(\\b").append(reservedCommand.name()).append("\\b)|");
@@ -30,7 +28,6 @@ public class CommandParser {
         builder.deleteCharAt(builder.lastIndexOf("|"));
         reservedCommandRegex = builder.toString();
 
-        //generate resrvedcommand.playercommand or regex
         builder = new StringBuilder(100);
         for (ReservedCommand.PlayerCommands reservedCommand : ReservedCommand.PlayerCommands.values()) {
             builder.append("(\\b").append(reservedCommand.name()).append("\\b)|");
@@ -38,14 +35,6 @@ public class CommandParser {
         builder.deleteCharAt(builder.lastIndexOf("|"));
         reservedPlayerCommandRegex = builder.toString();
 
-//        //generate single line command regex
-//        builder = new StringBuilder(100);
-//        for(ReservedCommand reservedCommand : ReservedCommand.values()) {
-//            if(reservedCommand.isSingleLineCommand()) {
-//                builder.append("(\\b").append(reservedCommand.name()).append("\\b)").append("|");
-//            }
-//        }
-//        builder.deleteCharAt(builder.lastIndexOf("|"));
         //generate reservedcommand.allSubCommand or regex
         subCommandRegex=reservedPlayerCommandRegex;
     }
@@ -57,7 +46,6 @@ public class CommandParser {
     private  static final String userCommandRegex = String.format("(?<%s>^![\\w]+)",capture_command);
 
     private static final String commandArgumentsRegex = "((?<=\\s)\\w+=[^\\s]+)(?<!\\s)";
-//    public static final String getCapture_reservedPlayerCommand = String.format("((?<=!)(%s))", reservedPlayerCommandRegex);
     private static final String getCapture_reservedCommand = String.format("((?<=!)(%s))", reservedCommandRegex);
     private static final String allEncompasingRegex= String.format("(?<%s>(!(\\w+))\\s*(!(%s))?([^!]*)(?<!\\s))",capture_command,subCommandRegex);
     private static final String replaceDigitsAfterPlayLocalCommand = "(?<=\\Q!playlocal\\E\\s?)(\\d+)";
@@ -73,12 +61,9 @@ public class CommandParser {
     private static final Pattern reservedPlayerCommandPattern = Pattern.compile(reservedPlayerCommandRegex);
     private static final Pattern optionalArgumentsPattern = Pattern.compile(commandArgumentsRegex);
     static final Pattern replaceDigitsAfterPlayLocalCommandPattern = Pattern.compile(replaceDigitsAfterPlayLocalCommand);
-//    public static final Pattern multiCommandPattern = Pattern.compile(multiCommandDelimiterRegex);
 
     @Inject
-    public CommandParser(@Named("prefix") String prefix, @Named("multi_delimiter") String[] multiDelimiters) {
-        String prefix1 = prefix;
-        String[] multiDelimiterss=multiDelimiters;
+    public CommandParser() {
     }
 
     static List<String> testRegexParse(String s, Pattern pattern) {
@@ -163,7 +148,7 @@ public class CommandParser {
             command = userAddMatcher.group(capture_command);
             entry = userAddMatcher.group(capture_value);
             //check the entry field for optional arguments
-            if(grabWholeTextAsValue==false) {
+            if(!grabWholeTextAsValue) {
                 Matcher optionalArgsMatcher = optionalArgumentsPattern.matcher(entry);
                 while(optionalArgsMatcher.find()) {
                     String optionalArgs = optionalArgsMatcher.group();

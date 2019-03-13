@@ -7,14 +7,14 @@ import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.security.auth.login.LoginException;
-import java.util.logging.Logger;
 
 class Launcher extends ListenerAdapter{
-    private static final Logger logger = Logger.getLogger(Launcher.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Launcher.class.getName());
 
-    public static void main(String[] args) throws LoginException{
+    public static void main(String[] args){
         Injector inject = Guice.createInjector(new CommandServiceModule(),new BotModule(), new AudioServiceModule());
         inject.getInstance(JDA.class);
         logger.info("All Modules injected. JDA is starting...");

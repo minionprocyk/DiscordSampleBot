@@ -10,14 +10,15 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.cloud.FirestoreClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.name.Named;
-import org.apache.http.auth.AUTH;
+import com.procyk.industries.data.CRUDable;
+import com.procyk.industries.data.FirestoreCRUD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -26,10 +27,7 @@ import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 public class CommandServiceModule extends AbstractModule{
-    @Inject
-    public CommandServiceModule() {
-    }
-
+    private final Logger logger = LoggerFactory.getLogger(CommandServiceModule.class);
     @Provides @Named("commands_store") String providesCommandsStoreFileName() {
         return "commands.data";
     }
@@ -47,8 +45,7 @@ public class CommandServiceModule extends AbstractModule{
         FirebaseApp.initializeApp(options);
         FirestoreOptions firestoreOptions =
                 FirestoreOptions.newBuilder().setCredentials(credentials).setTimestampsInSnapshotsEnabled(true).build();
-        Firestore firestore = firestoreOptions.getService();
-        return firestore;
+        return firestoreOptions.getService();
     }
     @Provides @Named("youtube")
     String providesYoutubeAPIKey() {
@@ -59,14 +56,14 @@ public class CommandServiceModule extends AbstractModule{
             properties.load(in);
             result = properties.getProperty("youtube");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not find youtube api key {}",e);
         }
         return result;
     }
     @Provides
     YouTube providesYoutube() {
         try {
-            YouTube youTube = new YouTube.Builder(
+            return new YouTube.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
                     GsonFactory.getDefaultInstance(),
                     new HttpRequestInitializer() {
@@ -75,14 +72,14 @@ public class CommandServiceModule extends AbstractModule{
                         }
             }).setApplicationName("youtube-discordsamplebot-cmdline")
                     .build();
-            return youTube;
         } catch (GeneralSecurityException | IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to establish a connection to youtube {}",e);
         }
         return null;
     }
+
     @Override
     protected void configure() {
+        bind(CRUDable.class).to(FirestoreCRUD.class).in(Scopes.SINGLETON);
     }
-
 }

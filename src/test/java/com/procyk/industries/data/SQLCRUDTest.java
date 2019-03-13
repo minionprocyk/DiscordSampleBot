@@ -6,16 +6,19 @@ import com.procyk.industries.command.Command;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
 public class SQLCRUDTest {
     @Inject
     SQLCRUD SQLCRUD;
 
-    @BeforeEach
+    @BeforeAll
     void setup() {
         Guice.createInjector(new BotModule(), new CommandServiceModule(), new AudioServiceModule()).injectMembers(this);
 

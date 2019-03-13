@@ -1,4 +1,4 @@
-FROM gradle:4.10.2-jdk8-slim
+FROM gradle:5.2.1-jdk8-slim
 COPY . /opt/DiscordSampleBot
 WORKDIR /opt/DiscordSampleBot
 

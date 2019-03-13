@@ -97,7 +97,7 @@ public class CommandService {
                 break;
             case search:
                 List<SearchResult> response = commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
-                if(response!=null)
+                if(!response.isEmpty())
                     performUserRequest(
                             event,
                             new Message("!play ".concat(

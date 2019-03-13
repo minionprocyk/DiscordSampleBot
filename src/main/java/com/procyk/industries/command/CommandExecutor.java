@@ -3,8 +3,6 @@ package com.procyk.industries.command;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.common.base.Joiner;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.util.MessageHandler;
@@ -23,7 +21,6 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -229,7 +226,7 @@ public class CommandExecutor {
                     }
                 }
 
-                if(setVolume==false) {
+                if(!setVolume) {
                     //get all chars after the operator to parse as int
                     char[] volume = new char[command.getValue().length()-1];
                     command.getValue().getChars(1,command.getValue().length(),volume,0);
@@ -248,6 +245,9 @@ public class CommandExecutor {
                         currVolume-=val;
 
                 }
+                currVolume = Math.max(0,currVolume);
+                currVolume = Math.min(100,currVolume);
+
                 audioServiceManager.setVolume(currVolume);
                 MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
                 break;
@@ -266,7 +266,6 @@ public class CommandExecutor {
      * @param command The command
      */
     void addCommand(MessageChannel messageChannel,Command command) {
-        //get the key and value from this string
         String returnString = this.commands.putIfAbsent(command.getKey(),command.getFormattedString());
         if(Objects.isNull(returnString)) {
             if(command.getValue().contains(ReservedCommand.player.name())
@@ -275,12 +274,12 @@ public class CommandExecutor {
                 String songPath = CommandParser.searchAndReplace(
                         command.getValue(),
                         CommandParser.replaceDigitsAfterPlayLocalCommandPattern,
-                        (str)-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
+                        str-> audioServiceManager.getSavableLocalTrackAsString(Integer.parseInt(str)));
                     command.setValue(songPath);
             }
-            logger.info("Command added "+command.getKey());
+            logger.info("Command added {}",command.getKey());
             commandStore.saveCommand(command);
-            logger.info("Command saved to file "+command.getKey());
+            logger.info("Command saved to file {}",command.getKey());
             MessageHandler.sendMessage(messageChannel, "Added ".concat(command.getKey()));
         }
     }
@@ -319,14 +318,12 @@ public class CommandExecutor {
     /**
      * Expects two arguments where the name of the second takes the place of the first. For instance !rename !aw_jeez !awjeez
      * will replace the name of the argument !aw_jeez with the new alias !awjeez.
-     * @param messageChannel
-     * @param command
      */
     void renameCommand(MessageChannel messageChannel, Member member, Command command) {
-        String cmd=null;
+        String cmd;
         if(StringUtils.isNotEmpty(command.getKey())
         && StringUtils.isNotEmpty(command.getValue())
-        && StringUtils.containsWhitespace(command.getValue().trim()) == false
+        && !StringUtils.containsWhitespace(command.getValue().trim())
         && (cmd = commands.get(command.getKey()))!=null) {
             deleteCommand(messageChannel, member, command);
             addCommand(messageChannel, new Command(command.getValue(), cmd));
@@ -344,7 +341,6 @@ public class CommandExecutor {
      * @return A string representing a user requested available command
      */
     String randomCommand(MessageChannel messageChannel) {
-        Random random = new Random();
         String[] keys = commands.keySet().toArray(new String[0]);
         String randomKey = keys[random.nextInt(keys.length)];
         MessageHandler.sendMessage(messageChannel, "Preparing command: ".concat(randomKey));
@@ -365,9 +361,6 @@ public class CommandExecutor {
 
     /**
      * Searches youtube using the provided text and plays from the resulting list.
-     * @param messageChannel
-     * @param member
-     * @param command
      */
     List<SearchResult> searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
         String query = command.getValue();
@@ -385,7 +378,7 @@ public class CommandExecutor {
         } catch (IOException e) {
             logger.warn("Failed to query search term: "+query, e);
         }
-        return null;
+        return Collections.emptyList();
     }
     /**
      * Check if user command contains a key and value. A key only reference will search a map of commands for an
