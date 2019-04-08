@@ -2,7 +2,7 @@ package com.procyk.industries.command;
 
 
 public enum ReservedCommand {
-    add ,edit,delete,group,leave,join,shutdown,commands,record,rename,search,play,notify,notifyme,player,random, user,test,none ;
+    add ,edit,delete,group,leave,join,shutdown,commands,record,rename,search,notify,notifyme,play,player,random, user,test,none ;
 
     public enum PlayerCommands{
         commands,skip,next,pause,stop,last,previous,playlist,resume,add,clear,play,queue,seek,volume, localmusic,
@@ -35,6 +35,6 @@ public enum ReservedCommand {
      * @return
      */
     public boolean isFullLineCommand() {
-        return this == play || this == search;
+        return this == search;
     }
 }

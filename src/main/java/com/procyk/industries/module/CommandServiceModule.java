@@ -56,7 +56,7 @@ public class CommandServiceModule extends AbstractModule{
             properties.load(in);
             result = properties.getProperty("youtube");
         } catch (IOException e) {
-            logger.error("Could not find youtube api key {}",e);
+            logger.error("Could not find youtube api key",e);
         }
         return result;
     }
@@ -73,7 +73,7 @@ public class CommandServiceModule extends AbstractModule{
             }).setApplicationName("youtube-discordsamplebot-cmdline")
                     .build();
         } catch (GeneralSecurityException | IOException e) {
-            logger.error("Failed to establish a connection to youtube {}",e);
+            logger.error("Failed to establish a connection to youtube",e);
         }
         return null;
     }

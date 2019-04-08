@@ -135,11 +135,15 @@ class CommandParserTest {
     }
     @Test
     void testParsePlay() {
-        String text = "!play youtube.com/watch?buyme_things";
+        String text = "!play youtube.com/watch?buyme_things start=10 end=20";
         Command cmd = CommandParser.parseCommand(text);
-        assertEquals(ReservedCommand.play, cmd.getReservedCommand());
-        assertEquals("youtube.com/watch?buyme_things", cmd.getValue());
+        Map<String,String> optionalCommands = new HashMap<>();
+        optionalCommands.put("start","10");
+        optionalCommands.put("end","20");
 
+        assertEquals(ReservedCommand.player, cmd.getReservedCommand());
+        assertEquals("youtube.com/watch?buyme_things", cmd.getValue());
+        assertEquals(optionalCommands,cmd.getOptionalArgsToValue());
         List<Command> cmds = CommandParser.parseCommands(text);
         assertEquals(cmds.get(0),cmd);
     }

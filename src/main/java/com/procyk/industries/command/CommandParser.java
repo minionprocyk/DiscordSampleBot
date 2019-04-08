@@ -134,6 +134,13 @@ public class CommandParser {
         String entry ;
 
         ReservedCommand reservedCommand = parseReservedCommand(value);
+
+        //force play to transform to a player command *THIS IS SUPER HACKY UNTIL I SWITCH TO ANTLR*
+        if(reservedCommand.equals(ReservedCommand.play)) {
+            reservedCommand = ReservedCommand.player;
+            value = "!player ".concat(value);
+        }
+
         if(reservedCommand.isNonUserCommand()) {
             value = removePrefix(value.replaceFirst(reservedCommand.name(), "")).trim();
             returnCommand.setReservedCommand(reservedCommand);

@@ -14,7 +14,7 @@ import java.util.Set;
 public class SQLCRUD implements CRUDable {
     private final String url;
     private final Logger logger = LoggerFactory.getLogger(SQLCRUD.class);
-
+    private final String SQL_ERROR="Failed to create commands table";
     @Inject
     public SQLCRUD(@Named("jdbc_url")String url) {
         this.url=url;
@@ -69,7 +69,7 @@ public class SQLCRUD implements CRUDable {
             statement.setString(2,command.getValue());
             statement.executeUpdate();
         } catch(SQLException e) {
-            logger.error("Failed to create commands table {}",e);
+            logger.error(SQL_ERROR,e);
         }
     }
 
@@ -81,7 +81,7 @@ public class SQLCRUD implements CRUDable {
             statement.setString(1,command.getKey());
             statement.execute();
         } catch(SQLException e) {
-            logger.error("Failed to create commands table");
+            logger.error(SQL_ERROR,e);
         }
     }
 
@@ -91,7 +91,7 @@ public class SQLCRUD implements CRUDable {
             Statement statement = conn.createStatement()) {
             statement.executeUpdate(sql);
         } catch(SQLException e) {
-            logger.error("Failed to drop commands table");
+            logger.error(SQL_ERROR,e);
         }
     }
     public void createCommandsTable() {
@@ -103,7 +103,7 @@ public class SQLCRUD implements CRUDable {
             Statement statement = conn.createStatement()) {
             statement.executeUpdate(sql);
         } catch(SQLException e) {
-            logger.error("Failed to create commands table");
+            logger.error(SQL_ERROR,e);
         }
     }
     private Connection getConnection() {
@@ -111,14 +111,14 @@ public class SQLCRUD implements CRUDable {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            logger.error("Failed to created JDBC {}",e);
+            logger.error("Failed to created JDBC",e);
         }
         try{
             conn = DriverManager.getConnection(url);
             DatabaseMetaData meta = conn.getMetaData();
             logger.info("Driver name is: {}", meta.getDriverName());
         } catch(SQLException e) {
-            logger.error("Failed to connect to SQLITE");
+            logger.error("Failed to connect to SQLITE",e);
         }
         if(conn==null)
             throw new NullPointerException("JDBC Connection could not be created");
@@ -128,7 +128,7 @@ public class SQLCRUD implements CRUDable {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            logger.error("Failed to create JDBC {}",e);
+            logger.error("Failed to create JDBC",e);
         }
         try(Connection conn = DriverManager.getConnection(url)) {
                if(conn!=null) {
@@ -137,7 +137,7 @@ public class SQLCRUD implements CRUDable {
 
                }
         } catch(SQLException e) {
-             logger.error("Failed to connect to SQLITE");
+             logger.error("Failed to connect to SQLITE",e);
         }
     }
 }

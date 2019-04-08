@@ -1,5 +1,8 @@
 package com.procyk.industries.strings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Strings implements StringMatcher{
 
     /**
@@ -93,6 +96,41 @@ public class Strings implements StringMatcher{
     }
 
     /**
+     * Converts a given text into a list of strings broken out as chunks.
+     * @param text Input Text
+     * @param threshold Number of chars to chunk together
+     * @return A collection of chunked items inside the text by the given threshold.
+     */
+    private static List<String> makeWordChunkWithThreshold(String text, int threshold) {
+        List<String> matchChunks = new ArrayList<>();
+        for(int i=0;i<text.length()-threshold+1;i++) {
+            String matchChunk = text.substring(i,threshold+i);
+            matchChunks.add(matchChunk);
+        }
+        return matchChunks;
+    }
+    /**
+     * Matches longer text using chunks chars.
+     * @return A StringMatcher who matches text on a chunk of chars
+     */
+    private static StringMatcher almostMatchesByWord() {
+        final int threshold=4;
+        return (text, match, allowedErrors) -> {
+            if(text.length() < threshold || match.length() < threshold)
+                return false;
+            List<String> matchChunks = makeWordChunkWithThreshold(match,threshold);
+
+            for(int i=0;i<text.length()-threshold+1;i++) {
+                String textChunk = text.substring(i,threshold+i);
+                boolean matched = matchChunks.stream()
+                                            .anyMatch(s -> s.equalsIgnoreCase(textChunk));
+                if(matched)return true;
+            }
+            return false;
+        };
+    }
+
+    /**
      *  Performs a more relaxed string search to check if two strings are equal. Ignores casing and allowed n number of errors.
      *  Will also match if the beginning of the match string loosely matches the beginning of the text or if each end
      *  of a given string matches.
@@ -104,6 +142,7 @@ public class Strings implements StringMatcher{
     @Override
     public  boolean almostMatches(String text, String match, int allowedErrors) {
         return almostMatchesByFront().almostMatches(text,match,allowedErrors)
-                || almostMatchesByFrontAndBackIgnoringLength().almostMatches(text,match,allowedErrors);
+                || almostMatchesByFrontAndBackIgnoringLength().almostMatches(text,match,allowedErrors)
+                || almostMatchesByWord().almostMatches(text, match, allowedErrors);
     }
 }

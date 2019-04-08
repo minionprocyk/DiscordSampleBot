@@ -2,11 +2,8 @@ package com.procyk.industries.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Scopes;
 import com.procyk.industries.bot.event.OnBotShutdownImpl;
 import com.procyk.industries.bot.event.OnMessageReceivedImpl;
-import com.procyk.industries.data.CRUDable;
-import com.procyk.industries.data.FirestoreCRUD;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;

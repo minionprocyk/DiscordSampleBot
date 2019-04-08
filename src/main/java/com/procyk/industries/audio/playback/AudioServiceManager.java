@@ -125,7 +125,7 @@ public class AudioServiceManager {
         try {
             audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew).get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.info("Thread interrupted while loading track {}", e);
+            logger.info("Thread interrupted while loading track", e);
             Thread.currentThread().interrupt();
         }
     }
