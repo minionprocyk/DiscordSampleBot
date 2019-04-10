@@ -29,6 +29,7 @@ public class TrackScheduler extends AudioEventAdapter{
     private static final Logger logger = LoggerFactory.getLogger(TrackScheduler.class);
     private final AudioPlayer player;
     private AudioTrack lastTrack;
+    private AudioTrackUserData lastTrackUserData;
     private final Deque<AudioTrack> queueTracks;
     private boolean repeat=false;
     private final ExecutorService executorService;
@@ -49,7 +50,7 @@ public class TrackScheduler extends AudioEventAdapter{
     public void startPreviousTrack() {
         AudioTrack track = getTrack(Direction.PREVIOUS);
         if(track!=null)
-            startTrack(track.makeClone(),false);
+            startTrack(track,false);
     }
     public void startNextTrack() {
         AudioTrack track = getTrack(Direction.NEXT);
@@ -118,8 +119,11 @@ public class TrackScheduler extends AudioEventAdapter{
         logger.info("Track ended with reason: {}",endReason);
         if (endReason.mayStartNext || endReason==AudioTrackEndReason.STOPPED) {
             lastTrack=track;
+            lastTrackUserData=track.getUserData(AudioTrackUserData.class);
+
             if(repeat) {
-                startTrack(track.makeClone(),false);
+                AudioTrack newTrack = getTrack(Direction.PREVIOUS);
+                startTrack(newTrack,false);
             }
             else {
                 startNextTrack();
@@ -155,7 +159,8 @@ public class TrackScheduler extends AudioEventAdapter{
                 result = queueTracks.poll();
                 break;
             case PREVIOUS:
-                result =lastTrack;
+                result =lastTrack.makeClone();
+                result.setUserData(lastTrackUserData);
                 break;
             default:
         }
@@ -167,7 +172,7 @@ public class TrackScheduler extends AudioEventAdapter{
     @Override
     public String toString() {
         List<String> tracks = queueTracks.stream()
-                .map(track -> String.format("%s:%s",track.getInfo().author,track.getInfo().title))
+                .map(track -> String.format("%s:%s%n",track.getInfo().author,track.getInfo().title))
                 .collect(Collectors.toList());
         Collections.reverse(tracks);
         String strTracks = tracks.isEmpty() ? "" : tracks.toString().concat(" - ");

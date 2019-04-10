@@ -45,7 +45,7 @@ public class AudioServiceManager {
             localMusicFiles = Files.walk(localMusicRootPath, FileVisitOption.FOLLOW_LINKS)
                     .collect(Collectors.toList()) ;
         } catch (IOException e) {
-            logger.info("Local Music Files not found.");
+            logger.info("Local Music Files not found.", e);
         }
         audioPlayer.addListener(trackScheduler);
         audioPlayer.setVolume(30);
@@ -117,7 +117,6 @@ public class AudioServiceManager {
         }
         AudioTrackUserData audioTrackUserData = new AudioTrackUserData(volume,start,end);
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
-        audioLoadResultHandler.setTrackInfo(audioTrackUserData);
         audioLoadResultHandlerNew.setTrackInfo(audioTrackUserData);
 
         //syncronously wait for load to finish to fix playlist printing
