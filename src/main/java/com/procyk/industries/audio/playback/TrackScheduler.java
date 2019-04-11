@@ -180,15 +180,18 @@ public class TrackScheduler extends AudioEventAdapter{
                 .collect(Collectors.toList());
 
         StringBuilder stringBuilder = new StringBuilder(100);
-        stringBuilder.append("Up Next: ");
-        for(int i=1;i<tracks.size();i++) {
-            if(i!=1)
-                stringBuilder.append(i).append(". ");
-            stringBuilder.append(tracks.get(i-1))
-                         .append(System.lineSeparator());
+        if(queueTracks.size()>1) {
+            stringBuilder.append("Up Next: ");
+            for(int i=1;i<tracks.size();i++) {
+                if(i!=1)
+                    stringBuilder.append(i).append(". ");
+                stringBuilder.append(tracks.get(i-1))
+                        .append(System.lineSeparator());
+            }
+            stringBuilder.append(System.lineSeparator());
         }
-        stringBuilder.append(System.lineSeparator())
-                .append("Currently Playing Track: ").append(
+
+        stringBuilder.append("Currently Playing Track: ").append(
                         player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title
                 );
         return stringBuilder.toString();
