@@ -96,14 +96,7 @@ public class CommandService {
                 commandExecutor.playerCommands(messageChannel, command);
                 break;
             case search:
-                List<SearchResult> response = commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
-                if(!response.isEmpty())
-                    performUserRequest(
-                            event,
-                            new Message("!play ".concat(
-                                    YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(response.get(0).getId().getVideoId()))
-                            )
-                    );
+                commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
                 break;
             case join:
                 commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);

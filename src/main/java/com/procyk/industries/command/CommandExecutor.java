@@ -5,9 +5,12 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.procyk.industries.audio.playback.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
+import com.procyk.industries.bot.event.MemberEvent;
+import com.procyk.industries.bot.event.OnMessageReceivedImpl;
 import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.module.Application;
 import com.procyk.industries.strings.Strings;
+import com.procyk.industries.strings.YoutubeLinkBuilder;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -21,6 +24,8 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -145,19 +150,7 @@ public class CommandExecutor {
             case add:
             case play:
             case queue :
-                if(StringUtils.isBlank(command.getValue())) {
-                    MessageHandler.sendMessage(messageChannel, 
-                            String.format("I can't read [!player %s]. Try [!player %<s <youtube_link>]",command.getKey())
-                    );
-                }
-                else {
-                    audioServiceManager.loadWithArgs(command);
-                    String playlist = audioServiceManager.getPlayList();
-                    if(playlist.equals(Application.TRACK_SCHEDULER_CANNOT_PLAY_TRACK))
-                        playlist = String.format("That command doesn't work and probably has a broken link: \"%s\".",
-                                command.getValue());
-                    MessageHandler.sendMessage(messageChannel, playlist);
-                }
+                playerPlay(messageChannel,command);
                 break;
             case seek:
 
@@ -255,6 +248,27 @@ public class CommandExecutor {
                 MessageHandler.sendMessage(messageChannel, 
                         String.format("!player %s is wrong. Try !player !queue <youtube_link>",StringUtils.defaultIfBlank(command.getKey(),""))
                 );
+        }
+    }
+
+    /**
+     * A PlayerCommand that attempts to queue a track for playing.
+     * @param messageChannel Message Channel
+     * @param command Command requires value set
+     */
+    private void playerPlay(MessageChannel messageChannel, Command command) {
+        if(StringUtils.isBlank(command.getValue())) {
+            MessageHandler.sendMessage(messageChannel,
+                    String.format("I can't read [!player %s]. Try [!player %<s <youtube_link>]",command.getKey())
+            );
+        }
+        else {
+            audioServiceManager.loadWithArgs(command);
+            String playlist = audioServiceManager.getPlayList();
+            if(playlist.equals(Application.TRACK_SCHEDULER_CANNOT_PLAY_TRACK))
+                playlist = String.format("That command doesn't work and probably has a broken link: \"%s\".",
+                        command.getValue());
+            MessageHandler.sendMessage(messageChannel, playlist);
         }
     }
 
@@ -362,23 +376,62 @@ public class CommandExecutor {
     /**
      * Searches youtube using the provided text and plays from the resulting list.
      */
-    List<SearchResult> searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
+    void searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
         String query = command.getValue();
+        String value = CommandParser.searchAndReturn(query,CommandParser.digits);
+        long nResults = value.equals(Application.PARSER_NO_MATCH_FOUND) ? 1L : Long.parseLong(value);
 
         try {
             YouTube.Search.List search = youtube.search().list("id, snippet");
             search.setQ(query);
             search.setKey(apiKey);
             search.setType("video");
-            search.setFields("items(id/videoId)");
-            search.setMaxResults(5L);
+            search.setMaxResults(nResults);
 
             SearchListResponse searchListResponse = search.execute();
-            return searchListResponse.getItems();
+            List<SearchResult> searchResults= searchListResponse.getItems();
+            if(!searchResults.isEmpty()) {
+                if(nResults > 1) {
+                    //format a string response containing all the search results
+                    StringBuilder stringBuilder = new StringBuilder(100);
+                    stringBuilder.append("What do you want me to play?")
+                            .append(System.lineSeparator())
+                            .append(System.lineSeparator());
+                    for(int i=1; i<= searchResults.size();i++) {
+                        stringBuilder.append(i)
+                                .append(". ")
+                                .append(searchResults.get(i-1).getSnippet().getTitle())
+                                .append(System.lineSeparator());
+                    }
+                    stringBuilder.append(System.lineSeparator())
+                            .append("Type anything else to cancel (expires in 30 seconds)");
+                    MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
+
+                    OnMessageReceivedImpl.registerMemberEvent(member.getEffectiveName(),
+                            new MemberEvent(member.getEffectiveName(),
+                            (cmd ->  {
+                                try {
+                                    int selection = Integer.parseInt(cmd.getValue())-1;
+                                    playerPlay(messageChannel,
+                                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(selection).getId().getVideoId()))
+                                    );
+                                }catch (Exception e) {
+                                    logger.warn("Could not complete member event with the following command: {}",cmd,e);
+                                }
+
+                            })
+                    ));
+                }
+                else {
+                    playerPlay(messageChannel,
+                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(0).getId().getVideoId()))
+                    );
+                }
+            }
+
         } catch (IOException e) {
             logger.warn("Failed to query search term: "+query, e);
         }
-        return Collections.emptyList();
     }
     /**
      * Check if user command contains a key and value. A key only reference will search a map of commands for an

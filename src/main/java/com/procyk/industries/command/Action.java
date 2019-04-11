@@ -1,5 +1,5 @@
 package com.procyk.industries.command;
 
-interface Action {
+public interface Action {
     void perform(Command command);
 }

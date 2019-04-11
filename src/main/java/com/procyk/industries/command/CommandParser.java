@@ -1,5 +1,6 @@
 package com.procyk.industries.command;
 
+import com.procyk.industries.module.Application;
 import com.procyk.industries.strings.StringModifier;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class CommandParser {
     private static final Pattern reservedPlayerCommandPattern = Pattern.compile(reservedPlayerCommandRegex);
     private static final Pattern optionalArgumentsPattern = Pattern.compile(commandArgumentsRegex);
     static final Pattern replaceDigitsAfterPlayLocalCommandPattern = Pattern.compile(replaceDigitsAfterPlayLocalCommand);
-
+    static final Pattern digits = Pattern.compile("\\d+");
     @Inject
     public CommandParser() {
     }
@@ -227,6 +228,17 @@ public class CommandParser {
         }
         matcher.appendTail(stringBuffer);
         return stringBuffer.toString();
+    }
+
+    /**
+     * Search for an instance of the provided pattern and return the first result.
+     */
+    public static String searchAndReturn(String text, Pattern regex) {
+        Matcher searchMatcher = regex.matcher(text);
+        if(searchMatcher.find()) {
+            return searchMatcher.group();
+        }
+        return Application.PARSER_NO_MATCH_FOUND;
     }
     private static String removePrefix(String s) {
         String prefix = "!";

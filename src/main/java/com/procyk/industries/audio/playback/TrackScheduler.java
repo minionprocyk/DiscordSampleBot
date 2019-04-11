@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.TrackMarker;
 import com.sedmelluq.discord.lavaplayer.track.TrackMarkerHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +75,7 @@ public class TrackScheduler extends AudioEventAdapter{
     public void setRepeat(boolean bRepeat) {
         this.repeat = bRepeat;
     }
+
     public void cancelPlayingTrack() {
         if(player.getPlayingTrack()!=null) {
             player.playTrack(null);
@@ -159,8 +161,10 @@ public class TrackScheduler extends AudioEventAdapter{
                 result = queueTracks.poll();
                 break;
             case PREVIOUS:
-                result =lastTrack.makeClone();
-                result.setUserData(lastTrackUserData);
+                if(lastTrack!=null) {
+                    result =lastTrack.makeClone();
+                    result.setUserData(lastTrackUserData);
+                }
                 break;
             default:
         }
@@ -172,16 +176,22 @@ public class TrackScheduler extends AudioEventAdapter{
     @Override
     public String toString() {
         List<String> tracks = queueTracks.stream()
-                .map(track -> String.format("%s:%s%n",track.getInfo().author,track.getInfo().title))
+                .map(track -> track.getInfo().title)
                 .collect(Collectors.toList());
-        Collections.reverse(tracks);
-        String strTracks = tracks.isEmpty() ? "" : tracks.toString().concat(" - ");
 
-        return strTracks
-                .concat(String.format("Currently Playing Track: %s by %s",
-                        player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title,
-                        player.getPlayingTrack()==null ? lastTrack.getInfo().author : player.getPlayingTrack().getInfo().author
-                ));
+        StringBuilder stringBuilder = new StringBuilder(100);
+        stringBuilder.append("Up Next: ");
+        for(int i=1;i<tracks.size();i++) {
+            if(i!=1)
+                stringBuilder.append(i).append(". ");
+            stringBuilder.append(tracks.get(i-1))
+                         .append(System.lineSeparator());
+        }
+        stringBuilder.append(System.lineSeparator())
+                .append("Currently Playing Track: ").append(
+                        player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title
+                );
+        return stringBuilder.toString();
     }
     public Future<String> playlist() {
         return executorService.submit(()-> {
