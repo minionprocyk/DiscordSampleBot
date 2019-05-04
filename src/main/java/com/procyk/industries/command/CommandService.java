@@ -1,7 +1,5 @@
 package com.procyk.industries.command;
 
-import com.google.api.services.youtube.model.SearchResult;
-import com.procyk.industries.strings.YoutubeLinkBuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
@@ -10,17 +8,19 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.List;
 
 @Singleton
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
-    private final String youtubeApi;
+
     @Inject
-    public CommandService(CommandExecutor commandExecutor, @Named("youtube") String youtubeApi) {
+    @Named("youtube")
+    private String youtubeApi;
+
+    @Inject
+    public CommandService(CommandExecutor commandExecutor) {
         this.commandExecutor=commandExecutor;
-        this.youtubeApi=youtubeApi;
     }
 
     /**
@@ -108,6 +108,7 @@ public class CommandService {
                commandExecutor.shutdown(messageChannel, member);
                 break;
             case test:
+
                 break;
             case none:
 

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,6 +39,9 @@ public class CommandExecutor {
     private final Strings specialStringsUtil;
     private final YouTube youtube;
     private final Random random;
+    @Inject
+    @Named("youtube")
+    private String youtubeApi;
 
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
@@ -392,7 +396,6 @@ public class CommandExecutor {
             List<SearchResult> searchResults= searchListResponse.getItems();
             if(!searchResults.isEmpty()) {
                 if(nResults > 1) {
-                    //format a string response containing all the search results
                     StringBuilder stringBuilder = new StringBuilder(100);
                     stringBuilder.append("What do you want me to play?")
                             .append(System.lineSeparator())
@@ -430,7 +433,7 @@ public class CommandExecutor {
             }
 
         } catch (IOException e) {
-            logger.warn("Failed to query search term: "+query, e);
+            logger.warn("Failed to query search term: {}",query, e);
         }
     }
     /**
@@ -443,7 +446,7 @@ public class CommandExecutor {
         if(StringUtils.isNotBlank(command.getKey())
                 && StringUtils.isBlank(command.getValue())) {
             String strCommand = commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey());
-            //if a command isn't found. suggest something that was close to it if possible
+
             if(strCommand.startsWith("Could not find")) {
                 try {
                     strCommand = strCommand
@@ -457,13 +460,13 @@ public class CommandExecutor {
 
             command.setValue(strCommand);
         }
-        //todo: add circular reflexive commands. This current resolves one layer of user commands
-        //nested reflection check
-        if(command.isReflexive()) {
+        if(command.isReflexive())
             reflexiveAction.perform(command);
-        }
         else
-            MessageHandler.sendMessage(messageChannel, command.getValue());
+            searchCommand(messageChannel,
+                    null,
+                    new Command("",command.getKey().substring(1).concat(" ").concat(command.getValue())),
+                            youtubeApi);
     }
 
     /**

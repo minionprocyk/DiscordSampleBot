@@ -15,25 +15,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class BotModule extends AbstractModule{
     private final Logger logger = LoggerFactory.getLogger(BotModule.class);
 
-    @Provides @Named("token") String providesToken() {
-        InputStream in = getClass().getResourceAsStream("/token");
-        Properties properties = new Properties();
-        String result="";
-        try {
-            properties.load(in);
-            result = properties.getProperty("token");
-        } catch (IOException e) {
-            logger.error("Could not find token file {}", e);
-        }
-        return result;
-    }
     @Provides @Named("prefix") String providesPrefix() {
         return "!";
     }

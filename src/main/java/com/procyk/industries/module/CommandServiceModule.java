@@ -14,6 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
 import org.slf4j.Logger;
@@ -47,19 +48,6 @@ public class CommandServiceModule extends AbstractModule{
                 FirestoreOptions.newBuilder().setCredentials(credentials).setTimestampsInSnapshotsEnabled(true).build();
         return firestoreOptions.getService();
     }
-    @Provides @Named("youtube")
-    String providesYoutubeAPIKey() {
-        InputStream in = getClass().getResourceAsStream("/token");
-        Properties properties = new Properties();
-        String result="";
-        try {
-            properties.load(in);
-            result = properties.getProperty("youtube");
-        } catch (IOException e) {
-            logger.error("Could not find youtube api key",e);
-        }
-        return result;
-    }
     @Provides
     YouTube providesYoutube() {
         try {
@@ -81,5 +69,12 @@ public class CommandServiceModule extends AbstractModule{
     @Override
     protected void configure() {
         bind(CRUDable.class).to(FirestoreCRUD.class).in(Scopes.SINGLETON);
+        Properties properties = new Properties();
+        try {
+            properties.load(getClass().getResourceAsStream("/token"));
+        } catch (IOException e) {
+            logger.error("Could not find youtube api key",e);
+        }
+        Names.bindProperties(binder(),properties);
     }
 }
