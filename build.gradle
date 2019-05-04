@@ -28,6 +28,7 @@ test {
 
 
 dependencies {
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.27.2.1'
     implementation group: 'com.google.firebase', name: 'firebase-admin', version: '6.7.0'
     implementation 'com.google.apis:google-api-services-youtube:v3-rev20190128-1.28.0'
     implementation 'net.dv8tion:JDA:3.8.3_461'

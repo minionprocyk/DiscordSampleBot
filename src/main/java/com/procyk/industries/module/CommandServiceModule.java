@@ -17,6 +17,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
+import com.procyk.industries.data.SQLCRUD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,7 @@ public class CommandServiceModule extends AbstractModule{
                 FirestoreOptions.newBuilder().setCredentials(credentials).setTimestampsInSnapshotsEnabled(true).build();
         return firestoreOptions.getService();
     }
+
     @Provides
     YouTube providesYoutube() {
         try {
@@ -68,7 +70,6 @@ public class CommandServiceModule extends AbstractModule{
 
     @Override
     protected void configure() {
-        bind(CRUDable.class).to(FirestoreCRUD.class).in(Scopes.SINGLETON);
         Properties properties = new Properties();
         try {
             properties.load(getClass().getResourceAsStream("/token"));
@@ -76,5 +77,6 @@ public class CommandServiceModule extends AbstractModule{
             logger.error("Could not find youtube api key",e);
         }
         Names.bindProperties(binder(),properties);
+        bind(CRUDable.class).to(SQLCRUD.class).in(Scopes.SINGLETON);
     }
 }
