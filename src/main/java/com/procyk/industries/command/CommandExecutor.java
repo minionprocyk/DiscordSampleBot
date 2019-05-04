@@ -457,8 +457,7 @@ public class CommandExecutor {
                     //keep original strCommand
                 }
             }
-
-            command.setValue(strCommand);
+            MessageHandler.sendMessage(messageChannel, strCommand);
         }
         if(command.isReflexive())
             reflexiveAction.perform(command);
