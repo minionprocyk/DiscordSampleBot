@@ -25,8 +25,6 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -452,12 +450,16 @@ public class CommandExecutor {
                     strCommand = strCommand
                             .concat(". Did you mean one of these? ")
                             .concat(suggestCommands(command.getKey()).toString());
+                    MessageHandler.sendMessage(messageChannel, strCommand);
+                    return;
                 }
                 catch (NoSuchElementException nsee) {
                     //keep original strCommand
                 }
             }
-            MessageHandler.sendMessage(messageChannel, strCommand);
+            else {
+                command.setValue(strCommand);
+            }
         }
         if(command.isReflexive())
             reflexiveAction.perform(command);
