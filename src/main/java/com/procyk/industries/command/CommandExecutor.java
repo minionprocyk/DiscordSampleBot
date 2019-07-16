@@ -408,8 +408,11 @@ public class CommandExecutor {
                             .append("Type anything else to cancel (expires in 30 seconds)");
                     MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
 
-                    OnMessageReceivedImpl.registerMemberEvent(member.getEffectiveName(),
-                            new MemberEvent(member.getEffectiveName(),
+                    //if member is null accept a response from anyone
+                    String registeredName = member!=null ? member.getEffectiveName() : "anyone";
+
+                    OnMessageReceivedImpl.registerMemberEvent(registeredName,
+                            new MemberEvent(registeredName,
                             (cmd ->  {
                                 try {
                                     int selection = Integer.parseInt(cmd.getValue())-1;
@@ -418,6 +421,7 @@ public class CommandExecutor {
                                     );
                                 }catch (Exception e) {
                                     logger.warn("Could not complete member event with the following command: {}",cmd,e);
+                                    MessageHandler.sendMessage(messageChannel, "I didn't understand \""+cmd.getValue()+"\". Try a number.");
                                 }
 
                             })
