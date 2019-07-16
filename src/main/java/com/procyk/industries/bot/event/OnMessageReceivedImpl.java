@@ -33,7 +33,8 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
         MemberEvent memberEvent;
         String memberNick = event.getMember().getEffectiveName();
         if(nameToMemberEvent.size()>0
-                && (memberEvent = (nameToMemberEvent.get(memberNick)))!=null) {
+                && (memberEvent = (nameToMemberEvent.get(memberNick)))!=null
+                || (memberEvent = (nameToMemberEvent.get("anyone")))!=null) {
             String payload = event.getMessage().getContentRaw();
             memberEvent.fire(payload);
             nameToMemberEvent.remove(memberNick);
