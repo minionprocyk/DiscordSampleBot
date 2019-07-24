@@ -35,6 +35,7 @@ public class CommandService {
         Member member = event.getMember();
         Guild guild = event.getGuild();
         User author = event.getAuthor();
+
         logger.info(String.format("Performing Reserved Command: [%s] using Command Key: [%s] Value: [%s] Opt: [%s]",
                 reservedCommand,command.getKey(),command.getValue(),command.getOptionalArgsToValue()));
         if(member!=null)
@@ -122,8 +123,6 @@ public class CommandService {
      * @param message The Message
      */
     public void performUserRequest(MessageReceivedEvent event, Message message) {
-        //handle reserved commands
-        if(event.getAuthor().isBot())return;
         String messageContent = message.getContent().toString();
         CommandParser.parseCommands(messageContent)
                 .forEach(command ->

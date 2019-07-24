@@ -27,6 +27,7 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        if(event.getAuthor().isBot())return;
         super.onMessageReceived(event);
         Message message = new Message(event.getMessage().getContentRaw());
 
@@ -35,9 +36,10 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
         if(nameToMemberEvent.size()>0
                 && (memberEvent = (nameToMemberEvent.get(memberNick)))!=null
                 || (memberEvent = (nameToMemberEvent.get("anyone")))!=null) {
+            nameToMemberEvent.remove(memberNick);
+            nameToMemberEvent.remove("anyone");
             String payload = event.getMessage().getContentRaw();
             memberEvent.fire(payload);
-            nameToMemberEvent.remove(memberNick);
         }
         else {
             commandService.performUserRequest(event,message);
