@@ -31,7 +31,7 @@ dependencies {
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.27.2.1'
     implementation group: 'com.google.firebase', name: 'firebase-admin', version: '6.7.0'
     implementation 'com.google.apis:google-api-services-youtube:v3-rev20190128-1.28.0'
-    implementation 'net.dv8tion:JDA:3.8.3_461'
+    implementation 'net.dv8tion:JDA:3.8.3_464'
     implementation group: 'com.google.inject', name: 'guice', version: '4.2.2'
     implementation group: 'com.google.guava', name: 'guava', version: '27.1-jre'
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
@@ -41,7 +41,7 @@ dependencies {
     testImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.0'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.0'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.16.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
 
 }
 mainClassName="com.procyk.industries.main.Launcher"

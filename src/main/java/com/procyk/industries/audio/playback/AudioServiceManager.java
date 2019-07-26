@@ -119,8 +119,6 @@ public class AudioServiceManager {
         AudioLoadResultHandlerImpl audioLoadResultHandlerNew= new AudioLoadResultHandlerImpl(trackScheduler);
         audioLoadResultHandlerNew.setTrackInfo(audioTrackUserData);
 
-        //syncronously wait for load to finish to fix playlist printing
-        //TODO would prefer to use future api like... loadItem.then(print playlist),
         try {
             audioPlayerManager.loadItem(command.getValue(),audioLoadResultHandlerNew).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -142,6 +140,15 @@ public class AudioServiceManager {
     }
     public void last() {
         trackScheduler.startPreviousTrack();
+    }
+    public void fastForward(String time) {
+        trackScheduler.fastForward(CommandParser.parseSecondsToMillisDecimalFormat(time));
+    }
+    public void rewind(String time) {
+        trackScheduler.rewind(CommandParser.parseSecondsToMillisDecimalFormat(time));
+    }
+    public void seek(String time) {
+        trackScheduler.seekTrack(CommandParser.parseSecondsToMillisDecimalFormat(time));
     }
 
     /**

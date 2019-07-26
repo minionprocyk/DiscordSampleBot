@@ -2,24 +2,25 @@ package com.procyk.industries.audio.playback;
 
 import com.procyk.industries.module.Application;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.TrackMarker;
 import com.sedmelluq.discord.lavaplayer.track.TrackMarkerHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class TrackScheduler extends AudioEventAdapter{
-    private static final Logger logger = LoggerFactory.getLogger(TrackScheduler.class);
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AudioPlayer player;
     private AudioTrack lastTrack;
     private AudioTrackUserData lastTrackUserData;
@@ -81,6 +82,43 @@ public class TrackScheduler extends AudioEventAdapter{
             player.playTrack(null);
         }
     }
+
+    /**
+     * Takes time and adjusts the track to the specified time
+     * @param time
+     */
+    public void seekTrack(long time) {
+        AudioTrack currTrack = player.getPlayingTrack();
+        if(currTrack!=null && currTrack.isSeekable()) {
+            player.getPlayingTrack().setPosition(time);
+        }
+    }
+
+    public void rewind(long time) {
+        changeFromCurrentTime(time,false);
+    }
+    public void fastForward(long time) {
+        changeFromCurrentTime(time, true);
+    }
+    private void changeFromCurrentTime(long time, boolean forward) {
+        AudioTrack currTrack = player.getPlayingTrack();
+        if(currTrack==null)
+            return;
+        long curr = currTrack.getPosition();
+        long len = currTrack.getDuration();
+
+        if(forward) {
+            long fflen = curr+time;
+            if(fflen < len)
+                seekTrack(fflen);
+        }
+        else {
+            long rrlen = curr-time;
+            if(rrlen >= 0L)
+                seekTrack(rrlen);
+        }
+
+    }
     @Override
     public void onPlayerPause(AudioPlayer player) { }
 
@@ -89,18 +127,14 @@ public class TrackScheduler extends AudioEventAdapter{
 
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        // A track started playing
         AudioTrackUserData userData = track.getUserData(AudioTrackUserData.class);
         if(userData!=null) {
-            //set player volume to user data volume if value is greater than 0, otherwise use player volume
             int volume = userData.getVolume();
             if(volume>0 && volume<=100) {
                 player.setVolume(volume);
             }
             if(track.isSeekable()) {
-                //always initialize track start as 0 by default, else use userData
                 track.setPosition(userData.getStart());
-                //set track event handler to start NEXT track if end time is triggered
                 long end = userData.getEnd();
                 if(end>0) {
                     track.setMarker(
@@ -191,9 +225,25 @@ public class TrackScheduler extends AudioEventAdapter{
             stringBuilder.append(System.lineSeparator());
         }
 
-        stringBuilder.append("Currently Playing Track: ").append(
-                        player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title
-                );
+        stringBuilder.append("Currently Playing Track: ")
+            .append(player.getPlayingTrack()==null ? lastTrack.getInfo().title : player.getPlayingTrack().getInfo().title);
+
+        if(player.getPlayingTrack()!=null) {
+            AudioTrack currTrack = player.getPlayingTrack();
+            long curr = currTrack.getPosition();
+            long duration = currTrack.getDuration();
+            stringBuilder.append(
+                    String.format(" [%02d:%02d / %02d:%02d]",
+                            TimeUnit.MILLISECONDS.toMinutes(curr),
+                            TimeUnit.MILLISECONDS.toSeconds(curr) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(curr)),
+                            TimeUnit.MILLISECONDS.toMinutes(duration),
+                            TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+                    )
+            )
+            ;
+        }
+
+
         return stringBuilder.toString();
     }
     public Future<String> playlist() {

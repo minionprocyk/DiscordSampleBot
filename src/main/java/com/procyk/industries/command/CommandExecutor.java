@@ -154,8 +154,14 @@ public class CommandExecutor {
             case queue :
                 playerPlay(messageChannel,command);
                 break;
+            case fastforward:
+                audioServiceManager.fastForward(command.getValue());
+                break;
+            case rewind:
+                audioServiceManager.rewind(command.getValue());
+                break;
             case seek:
-
+                audioServiceManager.seek(command.getValue());
                 break;
             case random:
                 List<Path> music = audioServiceManager.getKnownMusic();
@@ -407,8 +413,6 @@ public class CommandExecutor {
                     stringBuilder.append(System.lineSeparator())
                             .append("Type anything else to cancel (expires in 30 seconds)");
                     MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
-
-                    //if member is null accept a response from anyone
                     String registeredName = member!=null ? member.getEffectiveName() : "anyone";
 
                     OnMessageReceivedImpl.registerMemberEvent(registeredName,
@@ -490,6 +494,10 @@ public class CommandExecutor {
                 .collect(Collectors.toList());
     }
 
+    void showCommand(MessageChannel messageChannel, Command command) {
+        String strCommand = commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey());
+        MessageHandler.sendMessage(messageChannel, strCommand);
+    }
     /**
      * Groups a set of commands out of the root node and into some child node
      * @param messageChannel Discord Message Channel

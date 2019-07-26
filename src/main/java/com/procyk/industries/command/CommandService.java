@@ -69,6 +69,9 @@ public class CommandService {
                 String randomCommand = commandExecutor.randomCommand(messageChannel);
                 performUserRequest(event,new Message(randomCommand));
                 break;
+            case showcommand:
+                commandExecutor.showCommand(messageChannel, command);
+                break;
             case commands:
                 commandExecutor.printCommands(messageChannel);
                 break;
