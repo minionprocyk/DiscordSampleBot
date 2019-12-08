@@ -21,7 +21,7 @@ public final class MessageHandler {
                 while(handled < message.length()) {
                     sendMessageHandler(messageChannel, message.substring(start, handled));
                     start=handled;
-                    handled = (handled+MESSAGE_SIZE) > message.length() ? message.length() : handled+MESSAGE_SIZE;
+                    handled = Math.min((handled + MESSAGE_SIZE), message.length());
                 }
             } else {
                 sendMessageHandler(messageChannel, message);
