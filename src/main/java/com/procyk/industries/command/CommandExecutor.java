@@ -260,7 +260,7 @@ public class CommandExecutor {
     }
 
     /**
-     * A PlayerCommand that attempts to queue a track for playing.
+     * A PlayerCommand that attempts to queue a track for playing. Supports optional arguments (start,end,volume).
      * @param messageChannel Message Channel
      * @param command Command requires value set
      */
@@ -421,7 +421,7 @@ public class CommandExecutor {
                                 try {
                                     int selection = Integer.parseInt(cmd.getValue())-1;
                                     playerPlay(messageChannel,
-                                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(selection).getId().getVideoId()))
+                                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(selection).getId().getVideoId()),command.getOptionalArgsToValue())
                                     );
                                 }catch (Exception e) {
                                     logger.warn("Could not complete member event with the following command: {}",cmd,e);
@@ -433,7 +433,7 @@ public class CommandExecutor {
                 }
                 else {
                     playerPlay(messageChannel,
-                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(0).getId().getVideoId()))
+                            new Command("!play",YoutubeLinkBuilder.makeYoutubeLinkFromVideoId(searchResults.get(0).getId().getVideoId()), command.getOptionalArgsToValue())
                     );
                 }
             }
@@ -472,9 +472,12 @@ public class CommandExecutor {
         if(command.isReflexive())
             reflexiveAction.perform(command);
         else
-            searchCommand(messageChannel,
+            searchCommand(
+                    messageChannel,
                     null,
-                    new Command("",command.getKey().substring(1).concat(" ").concat(command.getValue())),
+                    new Command("",
+                            command.getKey().substring(1).concat(" ").concat(command.getValue()),
+                            command.getOptionalArgsToValue()),
                             youtubeApi);
     }
 

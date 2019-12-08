@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 
-public class Command implements Map.Entry<String,String>, Serializable {
+public class Command implements Serializable {
     private ReservedCommand reservedCommand;
     private String key;
     private String value;
@@ -22,6 +22,9 @@ public class Command implements Map.Entry<String,String>, Serializable {
     }
     public Command(String key, String value) {
         this(ReservedCommand.none,key,value);
+    }
+    public Command(String key, String value, Map<String,String> optionalArgsToValue) {
+        this(ReservedCommand.none, optionalArgsToValue, key, value);
     }
     public Command() {
         this(ReservedCommand.none,"","");
@@ -60,7 +63,7 @@ public class Command implements Map.Entry<String,String>, Serializable {
         }
         return false;
     }
-    @Override
+
     public String getKey() {
         return key;
     }
@@ -77,12 +80,12 @@ public class Command implements Map.Entry<String,String>, Serializable {
         this.reservedCommand = reservedCommand;
     }
 
-    @Override
+
     public String getValue() {
         return value;
     }
 
-    @Override
+
     public String setValue(String value) {
         return this.value=value;
     }
