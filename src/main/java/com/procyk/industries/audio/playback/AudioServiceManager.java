@@ -3,12 +3,12 @@ package com.procyk.industries.audio.playback;
 import com.google.inject.name.Named;
 import com.procyk.industries.command.Command;
 import com.procyk.industries.command.CommandParser;
+import com.procyk.industries.strings.Strings;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,7 @@ public class AudioServiceManager {
         start = CommandParser.parseSecondsToMillisDecimalFormat(strStart);
         end = CommandParser.parseSecondsToMillisDecimalFormat(strEnd);
 
-        if(StringUtils.isNotBlank(strVolume)) {
+        if(Strings.isNotBlank(strVolume)) {
             volume = Integer.parseInt(strVolume);
         }
         AudioTrackUserData audioTrackUserData = new AudioTrackUserData(volume,start,end);

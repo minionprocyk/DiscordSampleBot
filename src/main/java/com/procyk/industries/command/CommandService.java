@@ -6,17 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
-
-    @Inject
-    @Named("youtube")
-    private String youtubeApi;
 
     @Inject
     public CommandService(CommandExecutor commandExecutor) {
@@ -100,7 +95,7 @@ public class CommandService {
                 commandExecutor.playerCommands(messageChannel, command);
                 break;
             case search:
-                commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
+                commandExecutor.searchCommand(messageChannel, member, command);
                 break;
             case join:
                 commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);

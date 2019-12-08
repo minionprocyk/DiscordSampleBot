@@ -2,7 +2,7 @@ package com.procyk.industries.command;
 
 import com.procyk.industries.module.Application;
 import com.procyk.industries.strings.StringModifier;
-import org.apache.commons.lang3.StringUtils;
+import com.procyk.industries.strings.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class CommandParser {
      */
     public static long parseSecondsToMillisDecimalFormat(String val) {
         DecimalFormat decimalFormat = new DecimalFormat();
-        if(StringUtils.isNotBlank(val)) {
+        if(Strings.isNotBlank(val)) {
             try {
                 return (long) (decimalFormat.parse(val).doubleValue()*(double)1000);
             } catch (ParseException e) {
@@ -100,7 +100,7 @@ public class CommandParser {
         return parseCommand(value,false);
     }
     static ReservedCommand.PlayerCommands parsePlayerCommand(String value) {
-        if(StringUtils.isNotBlank(value)) {
+        if(Strings.isNotBlank(value)) {
             Matcher reservedCommandMatcher = reservedPlayerCommandPattern.matcher(value);
             if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
                 String strReservedCommand = reservedCommandMatcher.group();
@@ -110,7 +110,7 @@ public class CommandParser {
         return ReservedCommand.PlayerCommands.error;
     }
     private static ReservedCommand parseReservedCommand(String value) {
-        if(StringUtils.isNotBlank(value)) {
+        if(Strings.isNotBlank(value)) {
             Matcher reservedCommandMatcher = resrvedCommandPattern.matcher(value);
             if (reservedCommandMatcher.find() && reservedCommandMatcher.start()==1) {
                 String strReservedCommand = reservedCommandMatcher.group();

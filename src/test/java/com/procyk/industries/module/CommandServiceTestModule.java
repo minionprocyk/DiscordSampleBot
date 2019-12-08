@@ -5,11 +5,9 @@ import com.google.cloud.firestore.Firestore;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.name.Named;
 import com.procyk.industries.command.CommandStore;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
-
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,11 +17,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CommandServiceTestModule extends AbstractModule {
-@Provides
+    @Provides
     Firestore providesFirestore() {
         return mock(Firestore.class);
     }
-    @Provides @Named("youtube") String providesYoutubeApiString() {
+    @Provides @YouTubeToken String providesYoutubeApiString() {
     return "";
     }
     @Provides @com.google.inject.name.Named("commands_store") String providesCommandsStoreFileName() {

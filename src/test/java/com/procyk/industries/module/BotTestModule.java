@@ -25,8 +25,8 @@ import java.util.Properties;
 public class BotTestModule extends AbstractModule {
     private final Logger logger = LoggerFactory.getLogger(BotModule.class);
 
-    @Provides
-    @Named("token") String providesToken() {
+    @Provides @JDAToken
+    String providesToken() {
         InputStream in = getClass().getResourceAsStream("/token");
         Properties properties = new Properties();
         String result="";
@@ -34,7 +34,7 @@ public class BotTestModule extends AbstractModule {
             properties.load(in);
             result = properties.getProperty("token");
         } catch (IOException e) {
-            logger.error("Could not find token file {}", e);
+            logger.error("Could not find token file", e);
         }
         return result==null ? "" : result;
     }
@@ -52,10 +52,10 @@ public class BotTestModule extends AbstractModule {
     }
 
     @Provides
-    JDABuilder providesJDABuilder(@Named("token") String token, ListenerAdapter[] eventListener) {
+    JDABuilder providesJDABuilder(@JDAToken String token, ListenerAdapter... eventListener) {
         return new JDABuilder(AccountType.BOT)
                 .setToken(token)
-                .addEventListener((Object[])eventListener)
+                .addEventListener((Object[]) eventListener)
                 .setStatus(OnlineStatus.ONLINE);
     }
     @Provides @Named("jdbc_url") String providesJDBCUrl() {
@@ -66,7 +66,7 @@ public class BotTestModule extends AbstractModule {
         try {
             return jdaBuilder.build();
         } catch (LoginException e) {
-            logger.error("JDA Failed to launch {}",e);
+            logger.error("JDA Failed to launch",e);
         }
         return null;
     }

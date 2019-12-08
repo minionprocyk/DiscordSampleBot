@@ -124,6 +124,31 @@ public class Strings implements StringMatcher{
         };
     }
 
+    public static boolean isBlank(String value) {
+        return null == value || "".equals(value);
+    }
+
+    public static boolean isNotBlank(String value) {
+        return !isBlank(value);
+    }
+
+    public static boolean isEmpty(String value) {
+        return isBlank(value) || isBlank(value.replaceAll("\\s",""));
+    }
+
+    public static boolean isNotEmpty(String value) {
+        return !isEmpty(value);
+    }
+
+    public static String defaultIfBlank(String value, String strDefault) {
+        return isBlank(value) ? strDefault : value;
+    }
+
+    public static boolean containsWhitespace(String value) {
+        return value.contains(" ");
+    }
+
+
     /**
      *  Performs a more relaxed string search to check if two strings are equal. Ignores casing and allowed n number of errors.
      *  Will also match if the beginning of the match string loosely matches the beginning of the text or if each end
