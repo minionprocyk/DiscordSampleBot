@@ -3,6 +3,7 @@ package com.procyk.industries.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.name.Named;
 import com.procyk.industries.bot.event.OnBotShutdownImpl;
 import com.procyk.industries.bot.event.OnMessageReceivedImpl;
 import com.procyk.industries.data.CRUDable;
@@ -15,7 +16,6 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class BotTestModule extends AbstractModule {
         } catch (IOException e) {
             logger.error("Could not find token file {}", e);
         }
-        return result;
+        return result==null ? "" : result;
     }
     @Provides @Named("prefix") String providesPrefix() {
         return "!";

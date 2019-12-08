@@ -1,10 +1,7 @@
 package com.procyk.industries.command;
 
 import com.google.inject.Guice;
-import com.procyk.industries.module.AudioServiceModule;
-import com.procyk.industries.module.BotModule;
-import com.procyk.industries.module.CommandServiceModule;
-import com.procyk.industries.module.CommandServiceTestModule;
+import com.procyk.industries.module.*;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -31,7 +28,7 @@ class CommandExecutorTest {
     User user ;
     @BeforeAll
     public void setUp() {
-        Guice.createInjector(new BotModule(), new CommandServiceTestModule(),new AudioServiceModule()).injectMembers(this);
+        Guice.createInjector(new BotTestModule(), new CommandServiceTestModule(),new AudioServiceModule()).injectMembers(this);
         commands = new HashMap<String, String>()
         {{
           put("!test","test action");

@@ -5,11 +5,11 @@ import com.google.cloud.firestore.Firestore;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.name.Named;
 import com.procyk.industries.command.CommandStore;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
 
-import javax.inject.Named;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
