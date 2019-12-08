@@ -3,6 +3,7 @@ package com.procyk.industries.bot.event;
 import com.google.inject.Inject;
 import com.procyk.industries.command.CommandService;
 import com.procyk.industries.command.Message;
+import com.procyk.industries.module.Application;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -35,9 +36,9 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
         String memberNick = event.getMember().getEffectiveName();
         if(nameToMemberEvent.size()>0
                 && (memberEvent = (nameToMemberEvent.get(memberNick)))!=null
-                || (memberEvent = (nameToMemberEvent.get("anyone")))!=null) {
+                || (memberEvent = (nameToMemberEvent.get(Application.DEFAULT_MEMBER)))!=null) {
             nameToMemberEvent.remove(memberNick);
-            nameToMemberEvent.remove("anyone");
+            nameToMemberEvent.remove(Application.DEFAULT_MEMBER);
             String payload = event.getMessage().getContentRaw();
             memberEvent.fire(payload);
         }

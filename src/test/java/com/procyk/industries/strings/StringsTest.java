@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StringsTest {
     private final Strings strings = new Strings();
     int allowedErrors=2;
+
     @Test
     void testStringMatcher() {
         String text = "!imdieing";

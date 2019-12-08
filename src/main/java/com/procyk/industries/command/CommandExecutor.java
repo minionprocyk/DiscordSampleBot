@@ -413,7 +413,7 @@ public class CommandExecutor {
                     stringBuilder.append(System.lineSeparator())
                             .append("Type anything else to cancel (expires in 30 seconds)");
                     MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
-                    String registeredName = member!=null ? member.getEffectiveName() : "anyone";
+                    String registeredName = member!=null ? member.getEffectiveName() : Application.DEFAULT_MEMBER;
 
                     OnMessageReceivedImpl.registerMemberEvent(registeredName,
                             new MemberEvent(registeredName,

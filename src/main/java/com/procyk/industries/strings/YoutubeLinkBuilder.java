@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class YoutubeLinkBuilder {
     private static final Logger logger = LoggerFactory.getLogger(YoutubeLinkBuilder.class);
@@ -16,6 +17,7 @@ public final class YoutubeLinkBuilder {
      * @param videoId
      */
     public static String makeYoutubeLinkFromVideoId(String videoId) {
+        Objects.requireNonNull(videoId);
         return "https://www.youtube.com/watch?v=".concat(videoId);
     }
     public static List<String> makeYoutubeLinksFromSearchResult(List<SearchResult> searchResults) {
