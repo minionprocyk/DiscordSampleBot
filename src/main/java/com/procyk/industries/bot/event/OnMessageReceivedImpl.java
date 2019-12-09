@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import com.procyk.industries.command.CommandService;
 import com.procyk.industries.command.Message;
 import com.procyk.industries.module.Application;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -3,17 +3,11 @@ package com.procyk.industries.command;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.procyk.industries.module.*;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-
-
-import java.util.HashMap;
-import java.util.HashSet;
-
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;

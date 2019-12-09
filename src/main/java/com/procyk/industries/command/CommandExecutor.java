@@ -13,9 +13,9 @@ import com.procyk.industries.module.YouTubeToken;
 import com.procyk.industries.strings.Strings;
 import com.procyk.industries.strings.YoutubeLinkBuilder;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class CommandExecutor {
     void leaveVoiceChannel(Guild guild) {
         guild.getAudioManager().closeAudioConnection();
     }
-    void joinVoiceChannel(MessageChannel messageChannel, Channel channel, Member member, Guild guild) {
+    void joinVoiceChannel(MessageChannel messageChannel, GuildChannel channel, Member member, Guild guild) {
         if(guild.getSelfMember().hasPermission(channel, Permission.VOICE_CONNECT)) {
             VoiceChannel voiceChannel = member.getVoiceState().getChannel();
             AudioManager audioManager = guild.getAudioManager();

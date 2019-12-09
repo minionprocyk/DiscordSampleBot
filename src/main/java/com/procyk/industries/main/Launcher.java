@@ -5,8 +5,8 @@ import com.google.inject.Injector;
 import com.procyk.industries.module.AudioServiceModule;
 import com.procyk.industries.module.BotModule;
 import com.procyk.industries.module.CommandServiceModule;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

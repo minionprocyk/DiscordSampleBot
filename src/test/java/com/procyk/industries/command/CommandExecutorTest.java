@@ -2,11 +2,11 @@ package com.procyk.industries.command;
 
 import com.google.inject.Guice;
 import com.procyk.industries.module.*;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;

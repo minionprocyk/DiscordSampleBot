@@ -1,7 +1,7 @@
 package com.procyk.industries.bot.util;
 
 import com.procyk.industries.strings.Strings;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 public final class MessageHandler {
     private static final int MESSAGE_SIZE=1990;

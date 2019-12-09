@@ -8,11 +8,11 @@ import com.procyk.industries.bot.event.OnBotShutdownImpl;
 import com.procyk.industries.bot.event.OnMessageReceivedImpl;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.AccountType;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +52,10 @@ public class BotTestModule extends AbstractModule {
     }
 
     @Provides
-    JDABuilder providesJDABuilder(@JDAToken String token, ListenerAdapter... eventListener) {
+    JDABuilder providesJDABuilder(@JDAToken String token, ListenerAdapter[] eventListener) {
         return new JDABuilder(AccountType.BOT)
                 .setToken(token)
-                .addEventListener((Object[]) eventListener)
+                .addEventListeners(eventListener)
                 .setStatus(OnlineStatus.ONLINE);
     }
     @Provides @Named("jdbc_url") String providesJDBCUrl() {

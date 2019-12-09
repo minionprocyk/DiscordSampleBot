@@ -1,7 +1,7 @@
 package com.procyk.industries.command;
 
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +38,12 @@ public class CommandService {
                         "AuthorName: %s " +
                         "MemberNickName: %s " +
                         "MemberName: %s " +
-                        "Playing: %s " +
+                        "Activities: %s " +
                         "With Roles: %s",
                 author.getName(),
                 member.getNickname(),
                 member.getEffectiveName(),
-                member.getGame()==null ? "Nothing" : member.getGame().getName(),
+                member.getActivities(),
                 member.getRoles().toString()));
 
         switch(reservedCommand) {
