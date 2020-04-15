@@ -2,21 +2,12 @@ package com.procyk.industries.command;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.procyk.industries.module.AudioServiceModule;
-import com.procyk.industries.module.BotModule;
-import com.procyk.industries.module.CommandServiceModule;
-import com.procyk.industries.module.CommandServiceTestModule;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.requests.restaction.MessageAction;
+import com.procyk.industries.module.*;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-
-
-import java.util.HashMap;
-import java.util.HashSet;
-
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -37,7 +28,7 @@ class CommandServiceTest {
 
     @BeforeAll
     void setUp() {
-        Guice.createInjector(new CommandServiceTestModule(),new BotModule(),new AudioServiceModule()).injectMembers(this);
+        Guice.createInjector(new CommandServiceTestModule(),new BotTestModule(),new AudioServiceModule()).injectMembers(this);
         messageReceivedEvent = mock(MessageReceivedEvent.class);
         messageChannel = mock(MessageChannel.class);
         messageAction = mock(MessageAction.class);

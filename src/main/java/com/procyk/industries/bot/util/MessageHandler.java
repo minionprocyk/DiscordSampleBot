@@ -1,7 +1,7 @@
 package com.procyk.industries.bot.util;
 
-import net.dv8tion.jda.core.entities.MessageChannel;
-import org.apache.commons.lang3.StringUtils;
+import com.procyk.industries.strings.Strings;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 public final class MessageHandler {
     private static final int MESSAGE_SIZE=1990;
@@ -14,14 +14,14 @@ public final class MessageHandler {
      * of messages when the message is too big.
      */
     public static void sendMessage(MessageChannel messageChannel, String message) {
-        if(StringUtils.isNotBlank(message)) {
+        if(Strings.isNotBlank(message)) {
             if(message.length()>MESSAGE_SIZE) {
                 int handled = MESSAGE_SIZE;
                 int start=0;
                 while(handled < message.length()) {
                     sendMessageHandler(messageChannel, message.substring(start, handled));
                     start=handled;
-                    handled = (handled+MESSAGE_SIZE) > message.length() ? message.length() : handled+MESSAGE_SIZE;
+                    handled = Math.min((handled + MESSAGE_SIZE), message.length());
                 }
             } else {
                 sendMessageHandler(messageChannel, message);
@@ -29,7 +29,7 @@ public final class MessageHandler {
         }
     }
     private static void sendMessageHandler(MessageChannel messageChannel, String message) {
-        if(StringUtils.isBlank(message))
+        if(Strings.isBlank(message))
             return;
         String sb = "```" +
                 message +

@@ -9,8 +9,6 @@ import com.procyk.industries.command.CommandStore;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
 
-import javax.inject.Named;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -19,19 +17,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CommandServiceTestModule extends AbstractModule {
-@Provides
+    @Provides
     Firestore providesFirestore() {
         return mock(Firestore.class);
     }
-    @Provides @Named("youtube") String providesYoutubeApiString() {
+    @Provides @YouTubeToken String providesYoutubeApiString() {
     return "";
     }
-    @Provides @com.google.inject.name.Named("commands_store") String providesCommandsStoreFileName() {
+    @Provides @DBName String providesCommandsStoreFileName() {
         return "commands.data";
     }
-    @Provides @com.google.inject.name.Named("APP_PATH")
+    @Provides @ApplicationPath
     Path providesAPPPath(){
         return Paths.get(System.getProperty("user.home")).resolve("SampleDiscord");
+    }
+    @Provides @DeepspeechModelsPath
+    Path providesDeepspeechModelsPath(@ApplicationPath Path appPath) {
+        return appPath.resolve("lang");
     }
     @Provides
     YouTube providesYoutube() {

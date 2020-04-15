@@ -3,24 +3,24 @@ package com.procyk.industries.command;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
-import com.procyk.industries.audio.playback.AudioServiceManager;
+import com.procyk.industries.audio.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.event.MemberEvent;
 import com.procyk.industries.bot.event.OnMessageReceivedImpl;
 import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.module.Application;
+import com.procyk.industries.module.YouTubeToken;
+import com.procyk.industries.voiceparse.DiscoLangVoiceCommandParser;
 import com.procyk.industries.strings.Strings;
 import com.procyk.industries.strings.YoutubeLinkBuilder;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.managers.AudioManager;
-import org.apache.commons.lang3.StringUtils;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,18 +38,20 @@ public class CommandExecutor {
     private final YouTube youtube;
     private final Random random;
     @Inject
-    @Named("youtube")
+    @YouTubeToken
     private String youtubeApi;
+    private final DiscoLangVoiceCommandParser discoLangVoiceCommandParser;
 
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
-                           Random random, YouTube youTube) {
+                           DiscoLangVoiceCommandParser discoLangVoiceCommandParser, Random random, YouTube youTube) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
         this.youtube=youTube;
         this.random = random;
+        this.discoLangVoiceCommandParser=discoLangVoiceCommandParser;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
@@ -60,7 +62,7 @@ public class CommandExecutor {
     void leaveVoiceChannel(Guild guild) {
         guild.getAudioManager().closeAudioConnection();
     }
-    void joinVoiceChannel(MessageChannel messageChannel, Channel channel, Member member, Guild guild) {
+    void joinVoiceChannel(MessageChannel messageChannel, GuildChannel channel, Member member, Guild guild) {
         if(guild.getSelfMember().hasPermission(channel, Permission.VOICE_CONNECT)) {
             VoiceChannel voiceChannel = member.getVoiceState().getChannel();
             AudioManager audioManager = guild.getAudioManager();
@@ -201,7 +203,7 @@ public class CommandExecutor {
                 boolean addVolume=false;
                 boolean setVolume=true;
 
-                if(StringUtils.isBlank(command.getValue())) {
+                if(Strings.isBlank(command.getValue())) {
 
                     MessageHandler.sendMessage(messageChannel, "Audio Player Volume: ".concat(currVolume.toString()));
                     return;
@@ -254,7 +256,7 @@ public class CommandExecutor {
                 break;
             default:
                 MessageHandler.sendMessage(messageChannel, 
-                        String.format("!player %s is wrong. Try !player !queue <youtube_link>",StringUtils.defaultIfBlank(command.getKey(),""))
+                        String.format("!player %s is wrong. Try !player !queue <youtube_link>",Strings.defaultIfBlank(command.getKey(),""))
                 );
         }
     }
@@ -265,7 +267,7 @@ public class CommandExecutor {
      * @param command Command requires value set
      */
     private void playerPlay(MessageChannel messageChannel, Command command) {
-        if(StringUtils.isBlank(command.getValue())) {
+        if(Strings.isBlank(command.getValue())) {
             MessageHandler.sendMessage(messageChannel,
                     String.format("I can't read [!player %s]. Try [!player %<s <youtube_link>]",command.getKey())
             );
@@ -343,9 +345,9 @@ public class CommandExecutor {
      */
     void renameCommand(MessageChannel messageChannel, Member member, Command command) {
         String cmd;
-        if(StringUtils.isNotEmpty(command.getKey())
-        && StringUtils.isNotEmpty(command.getValue())
-        && !StringUtils.containsWhitespace(command.getValue().trim())
+        if(Strings.isNotEmpty(command.getKey())
+        && Strings.isNotEmpty(command.getValue())
+        && !Strings.containsWhitespace(command.getValue().trim())
         && (cmd = commands.get(command.getKey()))!=null) {
             deleteCommand(messageChannel, member, command);
             addCommand(messageChannel, new Command(command.getValue(), cmd));
@@ -384,7 +386,7 @@ public class CommandExecutor {
     /**
      * Searches youtube using the provided text and plays from the resulting list.
      */
-    void searchCommand(MessageChannel messageChannel, Member member, Command command, String apiKey) {
+    void searchCommand(MessageChannel messageChannel, Member member, Command command) {
         String query = command.getValue();
         String value = CommandParser.searchAndReturn(query,CommandParser.digits);
         long nResults = value.equals(Application.PARSER_NO_MATCH_FOUND) ? 1L : Long.parseLong(value);
@@ -392,7 +394,7 @@ public class CommandExecutor {
         try {
             YouTube.Search.List search = youtube.search().list("id, snippet");
             search.setQ(query);
-            search.setKey(apiKey);
+            search.setKey(youtubeApi);
             search.setType("video");
             search.setMaxResults(nResults);
 
@@ -413,7 +415,7 @@ public class CommandExecutor {
                     stringBuilder.append(System.lineSeparator())
                             .append("Type anything else to cancel (expires in 30 seconds)");
                     MessageHandler.sendMessage(messageChannel,stringBuilder.toString());
-                    String registeredName = member!=null ? member.getEffectiveName() : "anyone";
+                    String registeredName = member!=null ? member.getEffectiveName() : Application.DEFAULT_MEMBER;
 
                     OnMessageReceivedImpl.registerMemberEvent(registeredName,
                             new MemberEvent(registeredName,
@@ -449,8 +451,8 @@ public class CommandExecutor {
      */
     void userCommand(MessageChannel messageChannel, Command command, Action reflexiveAction) {
         Objects.requireNonNull(command);
-        if(StringUtils.isNotBlank(command.getKey())
-                && StringUtils.isBlank(command.getValue())) {
+        if(Strings.isNotBlank(command.getKey())
+                && Strings.isBlank(command.getValue())) {
             String strCommand = commands.getOrDefault(command.getKey(),"Could not find command "+command.getKey());
 
             if(strCommand.startsWith("Could not find")) {
@@ -477,8 +479,7 @@ public class CommandExecutor {
                     null,
                     new Command("",
                             command.getKey().substring(1).concat(" ").concat(command.getValue()),
-                            command.getOptionalArgsToValue()),
-                            youtubeApi);
+                            command.getOptionalArgsToValue()));
     }
 
     /**
@@ -530,5 +531,30 @@ public class CommandExecutor {
                         member!=null ? member.getUser().getName() : "person",
                         command.getValue())
         );
+    }
+
+
+    public void handleVoiceCommands(String strCommand, User user) {
+        Optional<TextChannel> optionalTextChannel= user.getJDA().getTextChannels().stream()
+                .filter(TextChannel::canTalk)
+                .filter(channel-> channel.getName().equalsIgnoreCase("General"))
+                .findFirst();
+
+        TextChannel textChannel;
+        Member member = user.getMutualGuilds().get(0).getMember(user);
+        Command command = discoLangVoiceCommandParser.parse(strCommand);
+
+        if(optionalTextChannel.isPresent() && command != null) {
+            textChannel = optionalTextChannel.get();
+            switch (command.getReservedCommand()) {
+                case search:
+                    searchCommand(textChannel, member, command);
+                    break;
+                case player:
+                    playerCommands(textChannel, command);
+                default:
+                    logger.info("Nothing to do with command: {}",command);
+            }
+        }
     }
 }

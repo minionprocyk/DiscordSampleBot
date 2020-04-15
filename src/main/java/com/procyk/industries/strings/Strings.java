@@ -62,24 +62,19 @@ public class Strings implements StringMatcher{
             for(int i=0;i<minLength/2;i++) {
                 char tc = textChars[i];
                 char mc = matchChars[i];
-                if(!charAlmostMatches(tc,mc)
-                && (++errors > allowedErrors)) {
+                if(!charAlmostMatches(tc,mc) && (++errors > allowedErrors))
                     return false;
-                }
             }
             int textCharsIndex = textChars.length-1;
             int matchCharsIndex = matchChars.length-1;
             for(int i=0;i<minLength/2;i++,textCharsIndex--,matchCharsIndex--) {
                 char tc = textChars[textCharsIndex];
                 char mc = matchChars[matchCharsIndex];
-                if(!charAlmostMatches(tc,mc)
-                && (++errors > allowedErrors)) {
+                if(!charAlmostMatches(tc,mc) && (++errors > allowedErrors))
                         return false;
-                }
             }
             //observe the middle character of the lower length array and match that to the left or right of the larger one
             if(minLength%2!=0) {
-                //pick the correct array
                 char[] lowerArray = textChars.length < matchChars.length ? textChars : matchChars;
                 char[] higherArray = textChars.length >= matchChars.length ? textChars : matchChars;
                 char compare = lowerArray[lowerArray.length/2];
@@ -87,9 +82,8 @@ public class Strings implements StringMatcher{
                 int fromLeft = minLength/2;
                 int fromRight = higherArray.length-fromLeft;
                 if(!charAlmostMatches(compare,higherArray[fromLeft])
-                        && !charAlmostMatches(compare, higherArray[fromRight])) {
+                && !charAlmostMatches(compare, higherArray[fromRight]))
                     return ++errors <= allowedErrors;
-                }
             }
             return true;
         };
@@ -129,6 +123,31 @@ public class Strings implements StringMatcher{
             return false;
         };
     }
+
+    public static boolean isBlank(String value) {
+        return null == value || "".equals(value);
+    }
+
+    public static boolean isNotBlank(String value) {
+        return !isBlank(value);
+    }
+
+    public static boolean isEmpty(String value) {
+        return isBlank(value) || isBlank(value.replaceAll("\\s",""));
+    }
+
+    public static boolean isNotEmpty(String value) {
+        return !isEmpty(value);
+    }
+
+    public static String defaultIfBlank(String value, String strDefault) {
+        return isBlank(value) ? strDefault : value;
+    }
+
+    public static boolean containsWhitespace(String value) {
+        return value.contains(" ");
+    }
+
 
     /**
      *  Performs a more relaxed string search to check if two strings are equal. Ignores casing and allowed n number of errors.

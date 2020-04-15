@@ -5,7 +5,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
 import com.google.inject.Inject;
 import com.procyk.industries.command.Command;
-import org.apache.commons.lang3.StringUtils;
+import com.procyk.industries.strings.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class FirestoreCRUD implements CRUDable {
 
     @Override
     public void addCommand(Command command) {
-        if(null!=command && StringUtils.isNotBlank(command.getKey()) && StringUtils.isNotBlank(command.getValue()))
+        if(null!=command && Strings.isNotBlank(command.getKey()) && Strings.isNotBlank(command.getValue()))
         {
             Map<String,String> fields = new HashMap<>();
             fields.put("name",command.getKey());

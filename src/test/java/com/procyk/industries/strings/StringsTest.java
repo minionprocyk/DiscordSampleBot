@@ -1,5 +1,6 @@
 package com.procyk.industries.strings;
 
+import autovalue.shaded.com.google$.common.annotations.$VisibleForTesting;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StringsTest {
     private final Strings strings = new Strings();
     int allowedErrors=2;
+
     @Test
     void testStringMatcher() {
         String text = "!imdieing";

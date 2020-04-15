@@ -1,22 +1,17 @@
 package com.procyk.industries.command;
 
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
 public class CommandService {
     private static final Logger logger = LoggerFactory.getLogger(CommandService.class);
     private final CommandExecutor commandExecutor;
-
-    @Inject
-    @Named("youtube")
-    private String youtubeApi;
 
     @Inject
     public CommandService(CommandExecutor commandExecutor) {
@@ -43,12 +38,12 @@ public class CommandService {
                         "AuthorName: %s " +
                         "MemberNickName: %s " +
                         "MemberName: %s " +
-                        "Playing: %s " +
+                        "Activities: %s " +
                         "With Roles: %s",
                 author.getName(),
                 member.getNickname(),
                 member.getEffectiveName(),
-                member.getGame()==null ? "Nothing" : member.getGame().getName(),
+                member.getActivities(),
                 member.getRoles().toString()));
 
         switch(reservedCommand) {
@@ -100,7 +95,7 @@ public class CommandService {
                 commandExecutor.playerCommands(messageChannel, command);
                 break;
             case search:
-                commandExecutor.searchCommand(messageChannel, member, command, youtubeApi);
+                commandExecutor.searchCommand(messageChannel, member, command);
                 break;
             case join:
                 commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);

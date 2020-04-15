@@ -29,3 +29,10 @@ src/main/resources/token
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+#db files
+*.db
+
+#project specific config
+src/main/resources/discordsamplebot-firebase-adminsdk.json
+
