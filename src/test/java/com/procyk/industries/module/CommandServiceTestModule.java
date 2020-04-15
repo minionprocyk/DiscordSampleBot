@@ -24,12 +24,16 @@ public class CommandServiceTestModule extends AbstractModule {
     @Provides @YouTubeToken String providesYoutubeApiString() {
     return "";
     }
-    @Provides @com.google.inject.name.Named("commands_store") String providesCommandsStoreFileName() {
+    @Provides @DBName String providesCommandsStoreFileName() {
         return "commands.data";
     }
-    @Provides @com.google.inject.name.Named("APP_PATH")
+    @Provides @ApplicationPath
     Path providesAPPPath(){
         return Paths.get(System.getProperty("user.home")).resolve("SampleDiscord");
+    }
+    @Provides @DeepspeechModelsPath
+    Path providesDeepspeechModelsPath(@ApplicationPath Path appPath) {
+        return appPath.resolve("lang");
     }
     @Provides
     YouTube providesYoutube() {

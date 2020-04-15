@@ -3,7 +3,6 @@ package com.procyk.industries.module;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.YouTubeRequestInitializer;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
@@ -12,8 +11,6 @@ import com.google.firebase.FirebaseOptions;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import com.procyk.industries.data.CRUDable;
 import com.procyk.industries.data.FirestoreCRUD;
 import org.slf4j.Logger;
@@ -28,13 +25,17 @@ import java.util.Properties;
 
 public class CommandServiceModule extends AbstractModule{
     private final Logger logger = LoggerFactory.getLogger(CommandServiceModule.class);
-    @Provides @Named("commands_store")
+    @Provides @DBName
     String providesCommandsStoreFileName() {
         return "commands.data";
     }
-    @Provides @Named("APP_PATH")
+    @Provides @ApplicationPath
     Path providesAPPPath(){
         return Paths.get(System.getProperty("user.home")).resolve("SampleDiscord");
+    }
+    @Provides @DeepspeechModelsPath
+    Path providesDeepspeechModelsPath(@ApplicationPath Path appPath) {
+        return appPath.resolve("lang");
     }
     @Provides
     Firestore providesFirestore() throws IOException {
@@ -81,6 +82,7 @@ public class CommandServiceModule extends AbstractModule{
         }
         return properties;
     }
+
     @Override
     protected void configure() {
         bind(CRUDable.class).to(FirestoreCRUD.class).in(Scopes.SINGLETON);

@@ -3,6 +3,7 @@ package com.procyk.industries.data;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.procyk.industries.command.Command;
+import com.procyk.industries.module.JDBCUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class SQLCRUD implements CRUDable {
     private final Logger logger = LoggerFactory.getLogger(SQLCRUD.class);
     private final String SQL_ERROR="Failed to create commands table";
     @Inject
-    public SQLCRUD(@Named("jdbc_url")String url) {
+    public SQLCRUD(@JDBCUrl String url) {
         this.url=url;
     }
     public void saveAllCommands(Map<String,String> commands) {

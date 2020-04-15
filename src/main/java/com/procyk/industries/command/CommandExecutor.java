@@ -3,13 +3,14 @@ package com.procyk.industries.command;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
-import com.procyk.industries.audio.playback.AudioServiceManager;
+import com.procyk.industries.audio.AudioServiceManager;
 import com.procyk.industries.audio.playback.TrackScheduler;
 import com.procyk.industries.bot.event.MemberEvent;
 import com.procyk.industries.bot.event.OnMessageReceivedImpl;
 import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.module.Application;
 import com.procyk.industries.module.YouTubeToken;
+import com.procyk.industries.voiceparse.DiscoLangVoiceCommandParser;
 import com.procyk.industries.strings.Strings;
 import com.procyk.industries.strings.YoutubeLinkBuilder;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -39,16 +40,18 @@ public class CommandExecutor {
     @Inject
     @YouTubeToken
     private String youtubeApi;
+    private final DiscoLangVoiceCommandParser discoLangVoiceCommandParser;
 
     @Inject
     public CommandExecutor(AudioServiceManager audioServiceManager, CommandStore commandStore, Strings strings,
-                           Random random, YouTube youTube) {
+                           DiscoLangVoiceCommandParser discoLangVoiceCommandParser, Random random, YouTube youTube) {
         commands = commandStore.getCommands();
         this.commandStore=commandStore;
         this.audioServiceManager = audioServiceManager;
         this.specialStringsUtil = strings;
         this.youtube=youTube;
         this.random = random;
+        this.discoLangVoiceCommandParser=discoLangVoiceCommandParser;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
         if(member.isOwner())
@@ -528,5 +531,30 @@ public class CommandExecutor {
                         member!=null ? member.getUser().getName() : "person",
                         command.getValue())
         );
+    }
+
+
+    public void handleVoiceCommands(String strCommand, User user) {
+        Optional<TextChannel> optionalTextChannel= user.getJDA().getTextChannels().stream()
+                .filter(TextChannel::canTalk)
+                .filter(channel-> channel.getName().equalsIgnoreCase("General"))
+                .findFirst();
+
+        TextChannel textChannel;
+        Member member = user.getMutualGuilds().get(0).getMember(user);
+        Command command = discoLangVoiceCommandParser.parse(strCommand);
+
+        if(optionalTextChannel.isPresent() && command != null) {
+            textChannel = optionalTextChannel.get();
+            switch (command.getReservedCommand()) {
+                case search:
+                    searchCommand(textChannel, member, command);
+                    break;
+                case player:
+                    playerCommands(textChannel, command);
+                default:
+                    logger.info("Nothing to do with command: {}",command);
+            }
+        }
     }
 }

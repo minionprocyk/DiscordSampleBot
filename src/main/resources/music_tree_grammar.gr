@@ -1,0 +1,6 @@
+play: (player)? PLAY words+
+
+id: music tree
+
+words: [A-Za-z\s]+
+PLAY: play

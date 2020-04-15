@@ -55,10 +55,10 @@ public class BotTestModule extends AbstractModule {
     JDABuilder providesJDABuilder(@JDAToken String token, ListenerAdapter[] eventListener) {
         return new JDABuilder(AccountType.BOT)
                 .setToken(token)
-                .addEventListeners(eventListener)
+                .addEventListeners((Object[]) eventListener)
                 .setStatus(OnlineStatus.ONLINE);
     }
-    @Provides @Named("jdbc_url") String providesJDBCUrl() {
+    @Provides @JDBCUrl String providesJDBCUrl() {
         return "jdbc:sqlite:commands.db";
     }
     @Provides @Singleton
