@@ -83,8 +83,7 @@ public class CommandServiceModule extends AbstractModule{
         } catch (IOException e) {
             logger.error("Could not load application properties",e);
         }
-        Names.bindProperties(binder(),properties);
-        bind(CRUDable.class).to(SQLCRUD.class).in(Scopes.SINGLETON);
+       
         return properties;
     }
 
