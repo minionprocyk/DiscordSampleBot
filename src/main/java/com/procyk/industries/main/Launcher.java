@@ -12,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 
 class Launcher extends ListenerAdapter{
-    private static final Logger logger = LoggerFactory.getLogger(Launcher.class.getName());
-
     public static void main(String[] args){
         Injector inject = Guice.createInjector(new CommandServiceModule(),new BotModule(), new AudioServiceModule());
         inject.getInstance(JDA.class);
-        logger.info("All Modules injected. JDA is starting...");
+        LoggerFactory.getLogger(Launcher.class).info("All Modules injected. JDA is starting...");
     }
 }

@@ -463,9 +463,7 @@ public class CommandExecutor {
                     MessageHandler.sendMessage(messageChannel, strCommand);
                     return;
                 }
-                catch (NoSuchElementException nsee) {
-                    //keep original strCommand
-                }
+                catch (NoSuchElementException ignore) { }
             }
             else {
                 command.setValue(strCommand);
