@@ -166,13 +166,6 @@ public class TrackScheduler extends AudioEventAdapter{
                 startNextTrack();
             }
         }
-
-        // endReason == FINISHED: A track finished or died by an exception (mayStartNext = true).
-        // endReason == LOAD_FAILED: Loading of a track failed (mayStartNext = true).
-        // endReason == STOPPED: The player was stopped.
-        // endReason == REPLACED: Another track started playing while this had not finished
-        // endReason == CLEANUP: Player hasn't been queried for a while, if you want you can put a
-        //                       clone of this back to your queue
     }
 
     @Override

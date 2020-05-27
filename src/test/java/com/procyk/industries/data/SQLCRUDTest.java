@@ -29,11 +29,8 @@ public class SQLCRUDTest {
     }
     @Test
     void testConnect() {
-        SQLCRUD.connect();
         SQLCRUD.createCommandsTable();
         SQLCRUD.addCommand(new Command("test","me"));
         SQLCRUD.removeCommand(new Command("test","me"));
-        System.out.println(SQLCRUD.getCommands());
-
     }
 }

@@ -50,39 +50,23 @@ public class CommandService {
             case add:
                 commandExecutor.addCommand(messageChannel,command);
                 break;
-            case user:
-                //if user command is a reflexive command then perform that action instead of printing the string
-                Action reflexiveAction = (cmd) -> { {
-                        Message message = new Message(cmd.getValue());
-                        performUserRequest(event,message);
-                    }
-                };
-                commandExecutor.userCommand(messageChannel,command,reflexiveAction);
-                break;
-            case random:
-                //forward a user-request with a random user-created command
-                String randomCommand = commandExecutor.randomCommand(messageChannel);
-                performUserRequest(event,new Message(randomCommand));
-                break;
-            case showcommand:
-                commandExecutor.showCommand(messageChannel, command);
-                break;
             case commands:
                 commandExecutor.printCommands(messageChannel);
-                break;
-            case edit:
-                commandExecutor.editCommand(messageChannel,member,command);
                 break;
             case delete:
                 commandExecutor.deleteCommand(messageChannel,member,command);
                 break;
+            case edit:
+                commandExecutor.editCommand(messageChannel,member,command);
+                break;
             case group:
                 commandExecutor.groupCommands(messageChannel, member, command);
                 break;
-            case record:
+            case join:
+                commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);
                 break;
-            case rename:
-                commandExecutor.renameCommand(messageChannel, member, command);
+            case leave:
+                commandExecutor.leaveVoiceChannel(guild);
                 break;
             case notify:
             case notifyme:
@@ -94,23 +78,35 @@ public class CommandService {
             case player:
                 commandExecutor.playerCommands(messageChannel, command);
                 break;
+            case random:
+                //forward a user-request with a random user-created command
+                String randomCommand = commandExecutor.randomCommand(messageChannel);
+                performUserRequest(event,new Message(randomCommand));
+                break;
+            case record:
+                break;
+            case rename:
+                commandExecutor.renameCommand(messageChannel, member, command);
+                break;
             case search:
                 commandExecutor.searchCommand(messageChannel, member, command);
                 break;
-            case join:
-                commandExecutor.joinVoiceChannel(messageChannel, textChannel, member, guild);
-                break;
-            case leave:
-                commandExecutor.leaveVoiceChannel(guild);
+            case show:
+            case showcommand:
+                commandExecutor.showCommand(messageChannel, command);
                 break;
             case shutdown:
-               commandExecutor.shutdown(messageChannel, member);
+                commandExecutor.shutdown(messageChannel, member);
                 break;
-            case test:
-
+            case user:
+                Action reflexiveAction = (cmd) -> {
+                    Message message = new Message(cmd.getValue());
+                    performUserRequest(event,message);
+                };
+                commandExecutor.userCommand(messageChannel,command,reflexiveAction);
                 break;
             case none:
-
+            case test:
             default:
         }
     }

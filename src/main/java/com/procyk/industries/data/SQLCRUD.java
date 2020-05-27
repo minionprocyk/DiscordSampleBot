@@ -125,20 +125,4 @@ public class SQLCRUD implements CRUDable {
             throw new NullPointerException("JDBC Connection could not be created");
         return conn;
     }
-    public void connect() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            logger.error("Failed to create JDBC",e);
-        }
-        try(Connection conn = DriverManager.getConnection(url)) {
-               if(conn!=null) {
-                   DatabaseMetaData meta = conn.getMetaData();
-                   logger.info("Driver name is: {}", meta.getDriverName());
-
-               }
-        } catch(SQLException e) {
-             logger.error("Failed to connect to SQLITE",e);
-        }
-    }
 }

@@ -153,4 +153,5 @@ class CommandParserTest {
         Command cmd = CommandParser.parseCommand(text);
         System.out.println(cmd.toString());
     }
+
 }
