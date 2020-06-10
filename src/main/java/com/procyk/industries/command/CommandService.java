@@ -1,5 +1,6 @@
 package com.procyk.industries.command;
 
+import com.google.common.base.Strings;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
@@ -48,6 +49,11 @@ public class CommandService {
 
         switch(reservedCommand) {
             case add:
+                if(Strings.isNullOrEmpty(command.getKey())
+                || Strings.isNullOrEmpty(command.getValue())
+                || "!".equals(command.getKey())
+                || "!".equals(command.getValue()))
+                    break;
                 commandExecutor.addCommand(messageChannel,command);
                 break;
             case commands:
