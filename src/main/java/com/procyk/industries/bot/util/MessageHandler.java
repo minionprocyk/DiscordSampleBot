@@ -4,6 +4,7 @@ import com.procyk.industries.strings.Strings;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public final class MessageHandler {
+    private static MessageChannel lastMessageChannel;
     private static final int MESSAGE_SIZE=1990;
 
     private MessageHandler() {
@@ -14,6 +15,7 @@ public final class MessageHandler {
      * of messages when the message is too big.
      */
     public static void sendMessage(MessageChannel messageChannel, String message) {
+
         if(Strings.isNotBlank(message)) {
             if(message.length()>MESSAGE_SIZE) {
                 int handled = MESSAGE_SIZE;
@@ -28,9 +30,13 @@ public final class MessageHandler {
             }
         }
     }
+    public static void sendMessage(String message) {
+        sendMessage(lastMessageChannel, message);
+    }
     private static void sendMessageHandler(MessageChannel messageChannel, String message) {
-        if(Strings.isBlank(message))
+        if(messageChannel==null || Strings.isBlank(message))
             return;
+        lastMessageChannel=messageChannel;
         String sb = "```" +
                 message +
                 "```";
