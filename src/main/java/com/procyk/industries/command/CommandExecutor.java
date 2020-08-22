@@ -392,10 +392,10 @@ public class CommandExecutor {
         long nResults = value.equals(Application.PARSER_NO_MATCH_FOUND) ? 1L : Long.parseLong(value);
 
         try {
-            YouTube.Search.List search = youtube.search().list("id, snippet");
+            YouTube.Search.List search = youtube.search().list(Arrays.asList("id","snippet"));
             search.setQ(query);
             search.setKey(youtubeApi);
-            search.setType("video");
+            search.setType(Collections.singletonList("video"));
             search.setMaxResults(nResults);
 
             SearchListResponse searchListResponse = search.execute();

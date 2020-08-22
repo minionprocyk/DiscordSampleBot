@@ -79,6 +79,7 @@ public class CommandService {
                 commandExecutor.notifyme(messageChannel,member,command);
                 break;
             case play:
+                logger.info("TODO: Fix parsing of {} to match the player command",command);
                 command.setReservedCommand(ReservedCommand.player);
                 command.setKey("!"+ReservedCommand.PlayerCommands.play.name());
             case player:

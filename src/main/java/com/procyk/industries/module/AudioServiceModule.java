@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.procyk.industries.audio.playback.AudioLoadResultHandlerImpl;
 import com.procyk.industries.audio.playback.AudioSendHandlerImpl;
-import com.procyk.industries.audio.record.AudioReceiveHandlerImpl;
+import com.procyk.industries.audio.record.VoiceActivatedListener;
 import com.procyk.industries.audio.record.CreateWaveFileTask;
 import com.procyk.industries.audio.record.SpeechToTextTask;
 import com.procyk.industries.audio.record.TaskFactory;
@@ -58,7 +58,7 @@ public class AudioServiceModule extends AbstractModule{
         super.configure();
         bind(AudioLoadResultHandler.class).to(AudioLoadResultHandlerImpl.class).in(Scopes.NO_SCOPE);
         bind(AudioSendHandler.class).to(AudioSendHandlerImpl.class);
-        bind(AudioReceiveHandler.class).to(AudioReceiveHandlerImpl.class);
+        bind(AudioReceiveHandler.class).to(VoiceActivatedListener.class);
         install(new FactoryModuleBuilder()
                 .implement(Callable.class, SpeechToTextTask.class)
                 .implement(Runnable.class, CreateWaveFileTask.class)
