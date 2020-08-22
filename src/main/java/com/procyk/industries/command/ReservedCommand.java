@@ -11,7 +11,11 @@ public enum ReservedCommand {
             return CommandParser.parsePlayerCommand(key);
         }
     }
+    String description;
 
+    public String getDescription() {
+        return description;
+    }
 
     /**
      * A command that is a reserved command created in this code.

@@ -11,15 +11,14 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class AudioReceiveHandlerImpl implements AudioReceiveHandler{
-    private static final Logger logger = LoggerFactory.getLogger(AudioReceiveHandlerImpl.class);
+public class VoiceActivatedListener implements AudioReceiveHandler{
+    private static final Logger logger = LoggerFactory.getLogger(VoiceActivatedListener.class);
     private static ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     private long before = System.nanoTime();
     private long counter=0;
@@ -29,8 +28,8 @@ public class AudioReceiveHandlerImpl implements AudioReceiveHandler{
     private static final long RECOGNITION_DELAY = 300L;
     private final TaskFactory taskFactory;
     @Inject
-    public AudioReceiveHandlerImpl(Provider<CommandExecutor> commandServiceProvider,
-                                   TaskFactory taskFactory) {
+    public VoiceActivatedListener(Provider<CommandExecutor> commandServiceProvider,
+                                  TaskFactory taskFactory) {
         this.commandExecutorProvider=commandServiceProvider;
         this.taskFactory=taskFactory;
     }

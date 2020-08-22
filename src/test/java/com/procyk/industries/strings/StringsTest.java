@@ -1,6 +1,5 @@
 package com.procyk.industries.strings;
 
-import autovalue.shaded.com.google$.common.annotations.$VisibleForTesting;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
