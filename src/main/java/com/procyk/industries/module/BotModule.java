@@ -50,7 +50,6 @@ public class BotModule extends AbstractModule{
                 .setChunkingFilter(ChunkingFilter.NONE)
                 .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING)
                 .setLargeThreshold(50)
-
                 ;
     }
     @Provides @JDBCUrl String providesJDBCUrl() {

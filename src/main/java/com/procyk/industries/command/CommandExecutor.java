@@ -68,9 +68,15 @@ public class CommandExecutor {
     }
     void joinVoiceChannel(MessageChannel messageChannel, GuildChannel channel, Member member, Guild guild) {
         if(guild.getSelfMember().hasPermission(channel, Permission.VOICE_CONNECT)) {
-            VoiceChannel voiceChannel = member.getVoiceState().getChannel();
-            AudioManager audioManager = guild.getAudioManager();
-            audioServiceManager.joinRequestedChannel(voiceChannel,audioManager);
+            GuildVoiceState guildVoiceState = member.getVoiceState();
+            if(guildVoiceState==null) {
+                MessageHandler.sendMessage(messageChannel, "Voice State is disabled, I can't read into voice channels");
+            }
+            else {
+                VoiceChannel voiceChannel = guildVoiceState.getChannel();
+                AudioManager audioManager = guild.getAudioManager();
+                audioServiceManager.joinRequestedChannel(voiceChannel,audioManager);
+            }
         }
         else {
             MessageHandler.sendMessage(messageChannel, "I do not have permission to join "+channel.getName());
@@ -498,12 +504,9 @@ public class CommandExecutor {
      * @return A list of possible outcomes that the user was trying to perform
      */
     List<String> suggestCommands(String strCommand) {
-        return commands.entrySet()
+        return commands.keySet()
                 .stream()
-                .filter(entry ->
-                    specialStringsUtil.almostMatches(entry.getKey(),strCommand,2)
-                )
-                .map(Map.Entry::getKey)
+                .filter(s -> specialStringsUtil.almostMatches(s, strCommand, 2))
                 .sorted()
                 .collect(Collectors.toList());
     }
