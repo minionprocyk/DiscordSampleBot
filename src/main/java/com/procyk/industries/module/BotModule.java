@@ -45,7 +45,7 @@ public class BotModule extends AbstractModule{
                 .setStatus(OnlineStatus.ONLINE)
                 .disableCache(CacheFlag.MEMBER_OVERRIDES,CacheFlag.ACTIVITY)
                 .setCompression(Compression.NONE)
-                .setActivity(Activity.listening("To my peeps"))
+                .setActivity(Activity.listening("My Peeps"))
                 .setMemberCachePolicy(MemberCachePolicy.VOICE.or(MemberCachePolicy.OWNER))
                 .setChunkingFilter(ChunkingFilter.NONE)
                 .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING)

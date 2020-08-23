@@ -15,7 +15,6 @@ public final class MessageHandler {
      * of messages when the message is too big.
      */
     public static void sendMessage(MessageChannel messageChannel, String message) {
-
         if(Strings.isNotBlank(message)) {
             if(message.length()>MESSAGE_SIZE) {
                 int handled = MESSAGE_SIZE;

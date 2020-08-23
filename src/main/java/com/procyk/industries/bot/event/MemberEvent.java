@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class MemberEvent {
     private final String member;
     private final Action command;
-    private long created;
+    private final long created;
 
     public MemberEvent(String member, final Action command) {
         this.member = member;
