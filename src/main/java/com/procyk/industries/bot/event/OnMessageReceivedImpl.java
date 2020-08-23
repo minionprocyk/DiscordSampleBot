@@ -1,9 +1,11 @@
 package com.procyk.industries.bot.event;
 
 import com.google.inject.Inject;
+import com.procyk.industries.bot.util.MessageHandler;
 import com.procyk.industries.command.CommandService;
 import com.procyk.industries.command.Message;
 import com.procyk.industries.module.Application;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -12,7 +14,7 @@ import java.util.Map;
 
 public class OnMessageReceivedImpl extends ListenerAdapter{
     private final CommandService commandService;
-    private static Map<String,MemberEvent> nameToMemberEvent = new HashMap<>();
+    private static final Map<String,MemberEvent> nameToMemberEvent = new HashMap<>();
 
     @Inject
     public OnMessageReceivedImpl(CommandService commandService) {
@@ -29,11 +31,16 @@ public class OnMessageReceivedImpl extends ListenerAdapter{
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if(event.getAuthor().isBot())return;
+        Member member;
+        if(null == (member = event.getMember())) {
+            MessageHandler.sendMessage(event.getChannel(), "I failed to look you up, I can't register this command");
+            return;
+        }
         super.onMessageReceived(event);
         Message message = new Message(event.getMessage().getContentRaw());
 
+        String memberNick = member.getEffectiveName();
         MemberEvent memberEvent;
-        String memberNick = event.getMember().getEffectiveName();
         if(nameToMemberEvent.size()>0
                 && (memberEvent = (nameToMemberEvent.get(memberNick)))!=null
                 || (memberEvent = (nameToMemberEvent.get(Application.DEFAULT_MEMBER)))!=null) {

@@ -54,6 +54,10 @@ public class CommandExecutor {
         this.discoLangVoiceCommandParser=discoLangVoiceCommandParser;
     }
     void shutdown(MessageChannel messageChannel, Member member) {
+        if(null == member) {
+            MessageHandler.sendMessage(messageChannel, "I failed to look you up, I can't shut myself down");
+            return;
+        }
         if(member.isOwner())
             messageChannel.getJDA().shutdown();
         else
@@ -320,6 +324,10 @@ public class CommandExecutor {
      * @param command Container of command information
      */
     void editCommand(MessageChannel messageChannel, Member member,Command command) {
+        if(null == member) {
+            MessageHandler.sendMessage(messageChannel, "I failed to look you up, I can't edit that command");
+            return;
+        }
         if(member.hasPermission(Permission.ADMINISTRATOR)
                 || member.hasPermission(Permission.BAN_MEMBERS)) {
             String keyCommand = commands.get(command.getKey());
@@ -371,6 +379,11 @@ public class CommandExecutor {
         return randomKey;
     }
     void deleteCommand(MessageChannel messageChannel, Member member, Command command) {
+        if(null == member) {
+            MessageHandler.sendMessage(messageChannel, "I failed to look you up, I can't delete that command");
+            return;
+        }
+
         if(member.hasPermission(Permission.ADMINISTRATOR)
                 || member.hasPermission(Permission.BAN_MEMBERS)) {
             commandStore.deleteCommand(command);
@@ -380,7 +393,6 @@ public class CommandExecutor {
         else {
             MessageHandler.sendMessage(messageChannel, member.getUser().getName()+" doesn't have permission to do that :stuck_out_tongue_winking_eye: ");
         }
-
     }
 
     /**
